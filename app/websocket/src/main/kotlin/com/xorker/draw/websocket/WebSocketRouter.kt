@@ -26,6 +26,11 @@ internal class WebSocketRouter(
 ) {
 
     fun route(session: WebSocketSession, request: WebSocketRequest) {
+        if(request.action == RequestAction.PING) {
+            sessionManager.setPing(SessionId(session.id))
+            return
+        }
+
         if (request.action == RequestAction.INIT) {
             webSocketController.initializeSession(session, request.extractBody())
             return
@@ -39,6 +44,7 @@ internal class WebSocketRouter(
         val sessionDto = sessionManager.getSession(SessionId(session.id)) ?: throw InvalidRequestValueException
 
         when (request.action) {
+            RequestAction.PING -> throw UnSupportedException
             RequestAction.INIT -> throw UnSupportedException
             RequestAction.RANDOM_MATCHING -> throw UnSupportedException
             RequestAction.START_GAME -> mafiaPhaseUseCase.startGame(sessionDto.user)
@@ -69,8 +75,6 @@ internal class WebSocketRouter(
 
                 mafiaGameUseCase.react(sessionDto.user, requestDto.reaction)
             }
-
-            RequestAction.PING -> sessionManager.setPing(SessionId(session.id))
         }
     }
 
