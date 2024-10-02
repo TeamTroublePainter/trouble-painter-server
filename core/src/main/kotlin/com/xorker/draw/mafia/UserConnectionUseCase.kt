@@ -5,6 +5,9 @@ import com.xorker.draw.user.User
 
 interface UserConnectionUseCase {
     fun connectUser(user: User, roomId: RoomId?, locale: String)
+
+    @Deprecated("connectUser 사용")
+    fun connectUserOld(user: User, roomId: RoomId?, locale: String)
     fun exitUser(user: User)
     fun disconnectUser(user: User)
 }

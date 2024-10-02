@@ -11,6 +11,7 @@ import com.xorker.draw.websocket.message.request.WebSocketRequest
 import com.xorker.draw.websocket.message.request.mafia.MafiaGameInferAnswerRequest
 import com.xorker.draw.websocket.message.request.mafia.MafiaGameReactionRequest
 import com.xorker.draw.websocket.message.request.mafia.MafiaGameVoteMafiaRequest
+import com.xorker.draw.websocket.session.Session
 import com.xorker.draw.websocket.session.SessionId
 import com.xorker.draw.websocket.session.SessionManager
 import org.springframework.stereotype.Component
@@ -24,6 +25,35 @@ internal class WebSocketRouter(
     private val mafiaPhaseUseCase: MafiaPhaseUseCase,
     private val mafiaGameUseCase: MafiaGameUseCase,
 ) {
+    fun route(session: Session, request: WebSocketRequest) {
+        when (request.action) {
+            RequestAction.PING -> sessionManager.setPing(session.id)
+            RequestAction.INIT -> throw InvalidRequestValueException
+            RequestAction.RANDOM_MATCHING -> throw InvalidRequestValueException
+            RequestAction.START_GAME -> mafiaPhaseUseCase.startGame(session.user)
+            RequestAction.DRAW -> mafiaGameUseCase.draw(session.user, request.extractBody())
+            RequestAction.END_TURN -> mafiaGameUseCase.nextTurnByUser(session.user)
+            RequestAction.VOTE -> {
+                val parsedRequest = request.extractBody<MafiaGameVoteMafiaRequest>()
+                mafiaGameUseCase.voteMafia(session.user, UserId(parsedRequest.userId))
+            }
+
+            RequestAction.ANSWER -> {
+                val parsedRequest = request.extractBody<MafiaGameInferAnswerRequest>()
+                mafiaGameUseCase.inferAnswer(session.user, parsedRequest.answer)
+            }
+
+            RequestAction.DECIDE_ANSWER -> {
+                val parsedRequest = request.extractBody<MafiaGameInferAnswerRequest>()
+                mafiaGameUseCase.decideAnswer(session.user, parsedRequest.answer)
+            }
+
+            RequestAction.REACTION -> {
+                val parsedRequest = request.extractBody<MafiaGameReactionRequest>()
+                mafiaGameUseCase.react(session.user, parsedRequest.reaction)
+            }
+        }
+    }
 
     fun route(session: WebSocketSession, request: WebSocketRequest) {
         if(request.action == RequestAction.PING) {
