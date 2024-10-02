@@ -56,7 +56,7 @@ internal class WebSocketRouter(
     }
 
     fun route(session: WebSocketSession, request: WebSocketRequest) {
-        if(request.action == RequestAction.PING) {
+        if (request.action == RequestAction.PING) {
             sessionManager.setPing(SessionId(session.id))
             return
         }
