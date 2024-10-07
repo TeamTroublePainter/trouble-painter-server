@@ -2,6 +2,7 @@ package com.xorker.draw.mafia
 
 import com.xorker.draw.exception.InvalidRequestOnlyMyTurnException
 import com.xorker.draw.exception.InvalidRequestValueException
+import com.xorker.draw.lock.LockRepository
 import com.xorker.draw.mafia.dto.DrawRequest
 import com.xorker.draw.mafia.phase.MafiaPhaseInferAnswerProcessor
 import com.xorker.draw.mafia.phase.MafiaPhasePlayGameProcessor
@@ -23,6 +24,7 @@ internal class MafiaGameService(
     private val mafiaGameRepository: MafiaGameRepository,
     private val mafiaGameMessenger: MafiaGameMessenger,
     private val timerRepository: TimerRepository,
+    private val lockRepository: LockRepository,
 ) : MafiaGameUseCase {
 
     override fun getGameInfoByUserId(userId: UserId): MafiaGameInfo? {
@@ -72,6 +74,7 @@ internal class MafiaGameService(
 
         vote(phase.players, user, targetUserId)
 
+        mafiaGameRepository.saveGameInfo(gameInfo)
         mafiaGameMessenger.broadcastVoteStatus(gameInfo)
     }
 
@@ -85,6 +88,7 @@ internal class MafiaGameService(
 
         phase.answer = answer
 
+        mafiaGameRepository.saveGameInfo(gameInfo)
         mafiaGameMessenger.broadcastAnswer(gameInfo, answer)
     }
 
@@ -99,6 +103,8 @@ internal class MafiaGameService(
         val room = gameInfo.room
 
         timerRepository.cancelTimer(room.id)
+
+        mafiaGameRepository.saveGameInfo(gameInfo)
 
         mafiaPhaseInferAnswerProcessor.processInferAnswer(gameInfo) {
             mafiaPhaseService.endGame(gameInfo.room.id)
@@ -121,18 +127,20 @@ internal class MafiaGameService(
         voter: User,
         targetUserId: UserId,
     ) {
-        synchronized(voter) {
-            val voterUserId = voter.id
+        val voterUserId = voter.id
 
-            players.forEach { player ->
-                val userIds = player.value
+        lockRepository.lock(voterUserId.value.toString())
 
-                if (voterUserId in userIds) {
-                    userIds.remove(voterUserId)
-                }
+        players.forEach { player ->
+            val userIds = player.value
+
+            if (voterUserId in userIds) {
+                userIds.remove(voterUserId)
             }
-            players[targetUserId]?.add(voterUserId) ?: InvalidRequestValueException
         }
+        players[targetUserId]?.add(voterUserId) ?: InvalidRequestValueException
+
+        lockRepository.unlock(voterUserId.value.toString())
     }
 
     private fun validateIsMafia(player: User, mafiaPlayer: MafiaPlayer) {
