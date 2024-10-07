@@ -1,5 +1,6 @@
 package com.xorker.draw.mafia
 
+import com.xorker.draw.event.mafia.MafiaGameInfoEventProducer
 import com.xorker.draw.exception.InvalidRequestOnlyMyTurnException
 import com.xorker.draw.exception.InvalidRequestValueException
 import com.xorker.draw.lock.LockRepository
@@ -22,9 +23,9 @@ internal class MafiaGameService(
     private val mafiaPhasePlayGameProcessor: MafiaPhasePlayGameProcessor,
     private val mafiaPhaseInferAnswerProcessor: MafiaPhaseInferAnswerProcessor,
     private val mafiaGameRepository: MafiaGameRepository,
-    private val mafiaGameMessenger: MafiaGameMessenger,
     private val timerRepository: TimerRepository,
     private val lockRepository: LockRepository,
+    private val mafiaGameInfoEventProducer: MafiaGameInfoEventProducer,
 ) : MafiaGameUseCase {
 
     override fun getGameInfoByUserId(userId: UserId): MafiaGameInfo? {
@@ -49,7 +50,7 @@ internal class MafiaGameService(
         phase.drawData.add(Pair(user.id, request.drawData))
 
         mafiaGameRepository.saveGameInfo(gameInfo)
-        mafiaGameMessenger.broadcastDraw(gameInfo.room.id, request.drawData)
+        mafiaGameInfoEventProducer.draw(gameInfo.room.id, request.drawData)
     }
 
     override fun nextTurnByUser(user: User) {
@@ -75,7 +76,7 @@ internal class MafiaGameService(
         vote(phase.players, user, targetUserId)
 
         mafiaGameRepository.saveGameInfo(gameInfo)
-        mafiaGameMessenger.broadcastVoteStatus(gameInfo)
+        mafiaGameInfoEventProducer.vote(gameInfo)
     }
 
     override fun inferAnswer(user: User, answer: String) {
@@ -89,7 +90,7 @@ internal class MafiaGameService(
         phase.answer = answer
 
         mafiaGameRepository.saveGameInfo(gameInfo)
-        mafiaGameMessenger.broadcastAnswer(gameInfo, answer)
+        mafiaGameInfoEventProducer.answer(gameInfo, answer)
     }
 
     override fun decideAnswer(user: User, answer: String) {
@@ -119,7 +120,7 @@ internal class MafiaGameService(
 
         val mafiaReaction = MafiaReactionType.of(reaction)
 
-        mafiaGameMessenger.broadcastReaction(gameInfo, mafiaReaction)
+        mafiaGameInfoEventProducer.reaction(gameInfo, mafiaReaction)
     }
 
     private fun vote(

@@ -1,12 +1,12 @@
 package com.xorker.draw.mafia.phase
 
+import com.xorker.draw.event.mafia.MafiaGameInfoEventProducer
 import com.xorker.draw.exception.InvalidRequestValueException
 import com.xorker.draw.exception.NotFoundRoomException
 import com.xorker.draw.lock.LockRepository
 import com.xorker.draw.mafia.MafiaGameInfo
 import com.xorker.draw.mafia.MafiaGameRepository
 import com.xorker.draw.mafia.MafiaPhase
-import com.xorker.draw.mafia.MafiaPhaseMessenger
 import com.xorker.draw.mafia.assert
 import com.xorker.draw.mafia.assertIs
 import com.xorker.draw.room.RoomId
@@ -21,7 +21,7 @@ internal class MafiaPhaseService(
     private val mafiaPhasePlayVoteProcessor: MafiaPhasePlayVoteProcessor,
     private val mafiaPhaseInferAnswerProcessor: MafiaPhaseInferAnswerProcessor,
     private val mafiaPhaseEndGameProcessor: MafiaPhaseEndGameProcessor,
-    private val mafiaPhaseMessenger: MafiaPhaseMessenger,
+    private val mafiaGameInfoEventProducer: MafiaGameInfoEventProducer,
     private val lockRepository: LockRepository,
 ) : MafiaPhaseUseCase {
 
@@ -46,7 +46,7 @@ internal class MafiaPhaseService(
 
         lockRepository.unlock(roomId.value)
 
-        mafiaPhaseMessenger.broadcastPhase(gameInfo)
+        mafiaGameInfoEventProducer.changePhase(gameInfo)
 
         return phase
     }
@@ -63,7 +63,7 @@ internal class MafiaPhaseService(
 
         lockRepository.unlock(roomId.value)
 
-        mafiaPhaseMessenger.broadcastPhase(gameInfo)
+        mafiaGameInfoEventProducer.changePhase(gameInfo)
 
         return phase
     }
@@ -88,7 +88,7 @@ internal class MafiaPhaseService(
 
         lockRepository.unlock(roomId.value)
 
-        mafiaPhaseMessenger.broadcastPhase(gameInfo)
+        mafiaGameInfoEventProducer.changePhase(gameInfo)
 
         return phase
     }
@@ -105,7 +105,7 @@ internal class MafiaPhaseService(
 
         lockRepository.unlock(roomId.value)
 
-        mafiaPhaseMessenger.broadcastPhase(gameInfo)
+        mafiaGameInfoEventProducer.changePhase(gameInfo)
 
         return phase
     }
@@ -122,7 +122,7 @@ internal class MafiaPhaseService(
 
         lockRepository.unlock(roomId.value)
 
-        mafiaPhaseMessenger.broadcastPhase(gameInfo)
+        mafiaGameInfoEventProducer.changePhase(gameInfo)
 
         return phase
     }
