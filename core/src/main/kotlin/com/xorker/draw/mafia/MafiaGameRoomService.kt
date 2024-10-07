@@ -81,6 +81,7 @@ internal class MafiaGameRoomService(
         gameInfo.room.remove(player)
 
         if (gameInfo.room.players.isEmpty()) {
+            mafiaGameRepository.removePlayer(user.id)
             mafiaGameRepository.removeGameInfo(gameInfo)
             return
         }
@@ -88,6 +89,7 @@ internal class MafiaGameRoomService(
         if (gameInfo.room.owner == player) {
             gameInfo.room.owner = gameInfo.room.players.first()
         }
+
         mafiaGameRepository.removePlayer(player.userId)
         mafiaGameRepository.saveGameInfo(gameInfo)
         mafiaGameMessenger.broadcastPlayerList(gameInfo)
