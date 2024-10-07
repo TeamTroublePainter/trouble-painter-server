@@ -42,7 +42,7 @@ internal abstract class BaseWebSocketHandler(
     override fun afterConnectionEstablished(session: WebSocketSession) {
         registerRequestId()
         val user = getUser(session) ?: throw UnAuthenticationException
-        val locale = session.getHeader("locale") ?: throw InvalidRequestValueException
+        val locale = session.getHeader(HEADER_LOCALE) ?: throw InvalidRequestValueException
 
         val sessionDto = SessionWrapper(session, user, locale)
         setupMdc(sessionDto)
@@ -60,7 +60,13 @@ internal abstract class BaseWebSocketHandler(
         registerRequestId()
 
         val sessionId = SessionId(session.id)
-        val sessionDto = sessionManager.getSession(sessionId) ?: return
+        val sessionDto = sessionManager.getSession(sessionId)
+
+        if (sessionDto == null) {
+            logger.error("Session이 존재하지 않습니다. ${session.id}")
+            return
+        }
+
         setupMdc(sessionDto)
 
         val request = parser.parse(message.payload)
@@ -154,7 +160,8 @@ internal abstract class BaseWebSocketHandler(
 
     companion object {
         private const val HEADER_AUTHORIZATION = "Authorization"
-        private const val HEADER_NICKNAME = "Nickname"
         private const val HEADER_BEARER = "bearer "
+        private const val HEADER_NICKNAME = "Nickname"
+        private const val HEADER_LOCALE = "locale"
     }
 }

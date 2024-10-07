@@ -32,7 +32,7 @@ internal class RoomWebSocketHandler(
     override fun afterConnect(session: Session) {
         userConnectionUseCase.connectUser(
             user = session.user,
-            roomId = RoomId(session.origin.getHeader("roomId")),
+            roomId = RoomId(session.origin.getHeader(HEADER_ROOM_ID)),
             locale = session.locale,
         )
     }
@@ -48,5 +48,9 @@ internal class RoomWebSocketHandler(
             CloseStatus.NORMAL -> userConnectionUseCase.exitUser(user)
             else -> userConnectionUseCase.disconnectUser(user)
         }
+    }
+
+    companion object {
+        private const val HEADER_ROOM_ID = "roomId"
     }
 }
