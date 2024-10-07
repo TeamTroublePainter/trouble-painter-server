@@ -28,6 +28,7 @@ sealed class ServerException(code: String, message: String, cause: Throwable? = 
 
 data object NotFoundUserException : ServerException("s001", "유저가 존재하지 않음") { private fun readResolve(): Any = NotFoundUserException }
 data object NotFoundWordException : ServerException("s002", "단어가 존재하지 않음") { private fun readResolve(): Any = NotFoundWordException }
+data object NotFoundLockKeyException : ServerException("s003", "락 키가 존재하지 않음") { private fun readResolve(): Any = NotFoundLockKeyException }
 //endregion
 
 //region Critical

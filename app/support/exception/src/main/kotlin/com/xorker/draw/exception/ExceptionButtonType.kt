@@ -63,6 +63,7 @@ fun XorkerException.getButtons(): List<ExceptionButtonType> {
         AlreadyPlayingRoomException,
         InvalidWebSocketStatusException,
         is NotDefinedMessageCodeException,
+        NotFoundLockKeyException,
         -> buttonOk
     }
 }
