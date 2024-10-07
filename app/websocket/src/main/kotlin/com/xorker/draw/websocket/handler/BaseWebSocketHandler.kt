@@ -18,6 +18,8 @@ import com.xorker.draw.websocket.session.Session
 import com.xorker.draw.websocket.session.SessionId
 import com.xorker.draw.websocket.session.SessionManager
 import com.xorker.draw.websocket.session.SessionWrapper
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import org.slf4j.MDC
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
@@ -132,7 +134,8 @@ internal abstract class BaseWebSocketHandler(
 
     private fun getUser(session: WebSocketSession): User? {
         val userId = getUserId(session) ?: return null
-        val nickname = session.getHeader(HEADER_NICKNAME) ?: return null
+        val encodedNickname = session.getHeader(HEADER_NICKNAME) ?: return null
+        val nickname = URLDecoder.decode(encodedNickname, StandardCharsets.UTF_8.toString())
 
         return User(userId, nickname)
     }
