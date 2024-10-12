@@ -6,6 +6,7 @@ import com.xorker.draw.support.auth.PrincipalUser
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -17,6 +18,7 @@ class RoomController(
 
     @Operation(summary = "현재 참여 중인 방 정보")
     @GetMapping("/api/v1/playing-room")
+    @PreAuthorize("isAuthenticated()")
     fun getPlayingRoom(
         @Parameter(hidden = true) user: PrincipalUser,
     ): PlayingRoomResponse {
