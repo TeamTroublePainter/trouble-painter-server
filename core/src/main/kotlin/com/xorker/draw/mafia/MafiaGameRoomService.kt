@@ -58,7 +58,7 @@ internal class MafiaGameRoomService(
 
         player.disconnect()
 
-        if (gameInfo.room.players.all { it.isConnect().not() }) {
+        if (gameInfo.room.players.all { it.isConnect.not() }) {
             mafiaGameRepository.removeGameInfo(gameInfo)
         } else {
             mafiaGameRepository.saveGameInfo(gameInfo)

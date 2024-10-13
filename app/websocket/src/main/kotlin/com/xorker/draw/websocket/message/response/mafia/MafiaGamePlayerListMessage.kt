@@ -25,4 +25,4 @@ data class MafiaPlayerResponse(
 )
 
 fun MafiaPlayer.toResponse(owner: MafiaPlayer): MafiaPlayerResponse =
-    MafiaPlayerResponse(this.userId, this.nickname, this.color, this.isConnect(), this == owner)
+    MafiaPlayerResponse(this.userId, this.nickname, this.color, this.isConnect, this == owner)

@@ -67,7 +67,7 @@ internal class MafiaPhaseEndGameProcessor(
         val players = room.players
         val owner = room.owner
 
-        val joinPlayers = players.filter { it.isConnect() }
+        val joinPlayers = players.filter { it.isConnect }
             .toList()
 
         if (joinPlayers.isEmpty()) return

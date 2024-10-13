@@ -4,7 +4,8 @@ import com.xorker.draw.room.Player
 import com.xorker.draw.user.UserId
 
 class MafiaPlayer(
-    userId: UserId,
-    nickname: String,
+    override val userId: UserId,
+    override val nickname: String,
     val color: String,
-) : Player(userId, nickname)
+    override var isConnect: Boolean = true,
+) : Player

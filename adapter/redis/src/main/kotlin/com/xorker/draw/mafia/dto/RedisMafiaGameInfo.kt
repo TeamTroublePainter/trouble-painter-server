@@ -24,7 +24,7 @@ fun MafiaGameInfo.toRedisMafiaGameInfo(): RedisMafiaGameInfo = RedisMafiaGameInf
             id = room.owner.userId.value,
             nickname = room.owner.nickname,
             color = room.owner.color,
-            isConnect = room.owner.isConnect(),
+            isConnect = room.owner.isConnect,
         ),
         maxMemberNum = room.maxMemberNum,
         players = room.players.map { player ->
@@ -32,7 +32,7 @@ fun MafiaGameInfo.toRedisMafiaGameInfo(): RedisMafiaGameInfo = RedisMafiaGameInf
                 id = player.userId.value,
                 nickname = player.nickname,
                 color = player.color,
-                isConnect = player.isConnect(),
+                isConnect = player.isConnect,
             )
         },
         isRandomMatching = room.isRandomMatching,

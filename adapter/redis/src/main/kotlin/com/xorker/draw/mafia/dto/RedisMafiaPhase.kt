@@ -66,14 +66,14 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
-                    isConnect = player.isConnect(),
+                    isConnect = player.isConnect,
                 )
             },
             mafiaPlayer = RedisMafiaPlayer(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
-                isConnect = mafiaPlayer.isConnect(),
+                isConnect = mafiaPlayer.isConnect,
             ),
             keyword = RedisMafiaKeyword(
                 answer = keyword.answer,
@@ -88,14 +88,14 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
-                    isConnect = player.isConnect(),
+                    isConnect = player.isConnect,
                 )
             },
             mafiaPlayer = RedisMafiaPlayer(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
-                isConnect = mafiaPlayer.isConnect(),
+                isConnect = mafiaPlayer.isConnect,
             ),
             keyword = RedisMafiaKeyword(
                 answer = keyword.answer,
@@ -115,14 +115,14 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
-                    isConnect = player.isConnect(),
+                    isConnect = player.isConnect,
                 )
             },
             mafiaPlayer = RedisMafiaPlayer(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
-                isConnect = mafiaPlayer.isConnect(),
+                isConnect = mafiaPlayer.isConnect,
             ),
             keyword = RedisMafiaKeyword(
                 answer = keyword.answer,
@@ -141,14 +141,14 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
-                    isConnect = player.isConnect(),
+                    isConnect = player.isConnect,
                 )
             },
             mafiaPlayer = RedisMafiaPlayer(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
-                isConnect = mafiaPlayer.isConnect(),
+                isConnect = mafiaPlayer.isConnect,
             ),
             keyword = RedisMafiaKeyword(
                 answer = keyword.answer,
@@ -167,14 +167,14 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
-                    isConnect = player.isConnect(),
+                    isConnect = player.isConnect,
                 )
             },
             mafiaPlayer = RedisMafiaPlayer(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
-                isConnect = mafiaPlayer.isConnect(),
+                isConnect = mafiaPlayer.isConnect,
             ),
             keyword = RedisMafiaKeyword(
                 answer = keyword.answer,
