@@ -44,7 +44,7 @@ internal class WebSocketController(
         MDC.put("roomId", request.roomId)
 
         if (request.roomId == null) {
-            userConnectionUseCase.connectUser(sessionDto.user, null, request.locale)
+            userConnectionUseCase.connectUserOld(sessionDto.user, null, request.locale)
             return
         }
 
@@ -60,7 +60,7 @@ internal class WebSocketController(
                 throw MaxRoomException
             }
 
-            userConnectionUseCase.connectUser(sessionDto.user, roomId, request.locale)
+            userConnectionUseCase.connectUserOld(sessionDto.user, roomId, request.locale)
         }
     }
 }

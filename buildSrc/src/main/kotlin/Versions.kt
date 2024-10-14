@@ -15,4 +15,6 @@ object Versions {
     const val MICROMETER = "1.12.9"
     const val SENTRY = "7.0.0"
     const val FIREBASE = "9.3.0"
+    const val KOTEST = "6.0.0.M1"
+    const val MOCKK = "1.13.12"
 }

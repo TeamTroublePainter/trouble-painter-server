@@ -14,7 +14,7 @@ internal class RedisLockAdapter(
     override fun lock(key: String) {
         while (getLock(key).not()) {
             try {
-                Thread.sleep(50)
+                Thread.sleep(SLEEP_TIME)
             } catch (e: InterruptedException) {
                 throw UnSupportedException
             }
@@ -28,10 +28,12 @@ internal class RedisLockAdapter(
     private fun getLock(key: String): Boolean {
         return redisTemplate
             .opsForValue()
-            .setIfAbsent(key + LOCK, LOCK, Duration.ofSeconds(1)) ?: throw NotFoundLockKeyException
+            .setIfAbsent(key + LOCK, LOCK, Duration.ofSeconds(LOCK_TIME)) ?: throw NotFoundLockKeyException
     }
 
     companion object {
         private const val LOCK = "lock"
+        private const val LOCK_TIME = 1L
+        private const val SLEEP_TIME = 50L
     }
 }
