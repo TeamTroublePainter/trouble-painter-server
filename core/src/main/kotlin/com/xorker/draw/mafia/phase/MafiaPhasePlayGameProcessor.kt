@@ -1,7 +1,7 @@
 package com.xorker.draw.mafia.phase
 
+import com.xorker.draw.event.mafia.MafiaGameInfoEventProducer
 import com.xorker.draw.mafia.MafiaGameInfo
-import com.xorker.draw.mafia.MafiaGameMessenger
 import com.xorker.draw.mafia.MafiaGameRepository
 import com.xorker.draw.mafia.MafiaPhase
 import com.xorker.draw.mafia.assertIs
@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component
 @Component
 internal class MafiaPhasePlayGameProcessor(
     private val timerRepository: TimerRepository,
-    private val mafiaGameMessenger: MafiaGameMessenger,
     private val mafiaGameRepository: MafiaGameRepository,
+    private val mafiaGameInfoEventProducer: MafiaGameInfoEventProducer,
 ) {
 
     internal fun playMafiaGame(gameInfo: MafiaGameInfo, nextStep: () -> Unit): MafiaPhase.Playing {
@@ -25,12 +25,16 @@ internal class MafiaPhasePlayGameProcessor(
         time = time.plus(gameOption.introAnimationTime)
         time = time.plus(gameOption.roundAnimationTime)
 
-        val job = timerRepository.startTimer(time) {
+        val room = gameInfo.room
+
+        timerRepository.startTimer(room.id, time) {
             processNextTurn(gameInfo, nextStep)
         }
 
-        val playingPhase = phase.toPlaying(job)
+        val playingPhase = phase.toPlaying()
         gameInfo.phase = playingPhase
+
+        mafiaGameRepository.saveGameInfo(gameInfo)
 
         return playingPhase
     }
@@ -58,12 +62,12 @@ internal class MafiaPhasePlayGameProcessor(
                 gameOption.turnTime
             }
 
-        phase.job = timerRepository.startTimer(time) {
+        timerRepository.startTimer(room.id, time) {
             processNextTurn(gameInfo, nextStep)
         }
 
         mafiaGameRepository.saveGameInfo(gameInfo)
 
-        mafiaGameMessenger.broadcastNextTurn(gameInfo)
+        mafiaGameInfoEventProducer.nextTurn(gameInfo)
     }
 }
