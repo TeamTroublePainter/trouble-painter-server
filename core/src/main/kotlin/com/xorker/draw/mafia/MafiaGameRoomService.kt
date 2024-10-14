@@ -1,7 +1,11 @@
 package com.xorker.draw.mafia
 
 import com.xorker.draw.event.mafia.MafiaGameInfoEventProducer
+import com.xorker.draw.exception.AlreadyPlayingRoomException
+import com.xorker.draw.exception.InvalidRequestOtherPlayingException
 import com.xorker.draw.exception.InvalidRequestValueException
+import com.xorker.draw.exception.MaxRoomException
+import com.xorker.draw.exception.NotFoundRoomException
 import com.xorker.draw.room.Room
 import com.xorker.draw.room.RoomId
 import com.xorker.draw.room.RoomRepository
@@ -17,11 +21,39 @@ internal class MafiaGameRoomService(
 ) : UserConnectionUseCase {
 
     override fun connectUser(user: User, roomId: RoomId?, locale: String) {
-        val roomIdNotNull = roomId ?: generateRoomId()
+        val joinedRoomId = mafiaGameRepository.getGameInfo(user.id)?.room?.id
+        if (joinedRoomId != null && roomId != joinedRoomId) {
+            throw InvalidRequestOtherPlayingException
+        }
 
-        MDC.put("roomId", roomIdNotNull.value)
+        if (roomId == null) {
+            connect(user, generateRoomId(), locale)
+            return
+        }
 
-        val gameInfo = connectGame(user, roomIdNotNull, locale, false)
+        val gameInfo = mafiaGameRepository.getGameInfo(roomId) ?: throw NotFoundRoomException
+
+        synchronized(gameInfo) {
+            if (gameInfo.phase != MafiaPhase.Wait && gameInfo.room.players.any { it.userId == user.id }.not()) {
+                throw AlreadyPlayingRoomException
+            }
+
+            if (gameInfo.gameOption.maximum <= gameInfo.room.size()) {
+                throw MaxRoomException
+            }
+
+            connect(user, roomId, locale)
+        }
+    }
+
+    override fun connectUserOld(user: User, roomId: RoomId?, locale: String) {
+        connect(user, roomId ?: generateRoomId(), locale)
+    }
+
+    private fun connect(user: User, roomId: RoomId, locale: String) {
+        MDC.put("roomId", roomId.value)
+
+        val gameInfo = connectGame(user, roomId, locale, false)
 
         mafiaGameInfoEventProducer.connectPlayer(gameInfo, user.id)
     }

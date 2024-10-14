@@ -14,6 +14,7 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 
+@Deprecated("com.xorker.draw.websocket.handler.RoomWebSocketHandler 사용")
 @Component
 internal class MainWebSocketHandler(
     private val sessionManager: SessionManager,

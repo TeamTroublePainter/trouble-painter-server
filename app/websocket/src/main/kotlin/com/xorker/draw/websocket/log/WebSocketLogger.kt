@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.WebSocketSession
 
+@Deprecated("com.xorker.draw.websocket.handler.RoomWebSocketHandler 사용")
 @Component
 internal class WebSocketLogger(
     private val sessionManager: SessionManager,
