@@ -5,7 +5,6 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.AuthenticationException
 import org.springframework.validation.BindException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -21,16 +20,6 @@ class ApiExceptionHandler(
     private val responseFactory: ExceptionResponseFactory,
 ) {
     private val log = logger()
-
-    @ExceptionHandler(AuthenticationException::class)
-    protected fun handleException(ex: AuthenticationException): ExceptionResponseEntity {
-        return handleException(UnAuthenticationException)
-    }
-
-    @ExceptionHandler(AccessDeniedException::class)
-    protected fun handleException(ex: AccessDeniedException): ExceptionResponseEntity {
-        return handleException(UnAuthorizedException)
-    }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
     protected fun handleException(ex: HttpRequestMethodNotSupportedException): ExceptionResponseEntity {

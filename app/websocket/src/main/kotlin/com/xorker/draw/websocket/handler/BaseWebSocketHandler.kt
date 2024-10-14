@@ -41,7 +41,7 @@ internal abstract class BaseWebSocketHandler(
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
         registerRequestId()
-        val user = getUser(session) ?: throw UnAuthenticationException
+        val user = getUser(session) ?: throw UnAuthenticationException()
         val locale = session.getHeader(HEADER_LOCALE) ?: throw InvalidRequestValueException
 
         val sessionDto = SessionWrapper(session, user, locale)
