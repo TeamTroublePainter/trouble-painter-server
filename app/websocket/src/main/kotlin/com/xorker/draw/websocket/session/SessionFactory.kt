@@ -31,6 +31,6 @@ internal class SessionFactory(
     }
 
     private fun getUserId(token: String): UserId {
-        return tokenUseCase.getUserId(token) ?: throw UnAuthenticationException
+        return tokenUseCase.getUserId(token) ?: throw UnAuthenticationException()
     }
 }
