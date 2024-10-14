@@ -1,6 +1,5 @@
 package com.xorker.draw.support.auth
 
-import com.xorker.draw.exception.UnAuthorizedException
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
