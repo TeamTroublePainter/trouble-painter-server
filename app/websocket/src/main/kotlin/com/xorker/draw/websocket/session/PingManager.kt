@@ -37,6 +37,6 @@ internal class PingManager(
     }
 
     companion object {
-        private const val ALLOWED_DELAY_TIME = 2
+        private const val ALLOWED_DELAY_TIME = 3600
     }
 }
