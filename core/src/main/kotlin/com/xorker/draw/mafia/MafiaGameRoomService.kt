@@ -81,7 +81,7 @@ internal class MafiaGameRoomService(
         val userId = user.id
         val gameInfo = mafiaGameRepository.getGameInfo(userId) ?: return
 
-        if (gameInfo.phase == MafiaPhase.Wait) {
+        if (gameInfo.phase == MafiaPhase.Wait || gameInfo.phase is MafiaPhase.End) {
             exitUser(user)
             return
         }
@@ -102,7 +102,7 @@ internal class MafiaGameRoomService(
         val userId = user.id
         val gameInfo = mafiaGameRepository.getGameInfo(userId) ?: return
 
-        if (gameInfo.phase != MafiaPhase.Wait) {
+        if (gameInfo.phase != MafiaPhase.Wait && gameInfo.phase !is MafiaPhase.End) {
             disconnectUser(user)
             return
         }
