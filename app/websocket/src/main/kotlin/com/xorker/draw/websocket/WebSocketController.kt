@@ -11,6 +11,7 @@ import com.xorker.draw.mafia.WaitingQueueUseCase
 import com.xorker.draw.room.RoomId
 import com.xorker.draw.websocket.message.request.mafia.MafiaGameRandomMatchingRequest
 import com.xorker.draw.websocket.message.request.mafia.SessionInitializeRequest
+import com.xorker.draw.websocket.session.Session
 import com.xorker.draw.websocket.session.SessionFactory
 import com.xorker.draw.websocket.session.SessionManager
 import org.slf4j.MDC
@@ -25,6 +26,11 @@ internal class WebSocketController(
     private val mafiaGameUseCase: MafiaGameUseCase,
     private val userConnectionUseCase: UserConnectionUseCase,
 ) {
+
+    fun rematch(session: Session) {
+        userConnectionUseCase.disconnectUser(session.user)
+        waitingQueueUseCase.enqueue(session.user, session.locale)
+    }
 
     fun initializeWaitingQueueSession(session: WebSocketSession, request: MafiaGameRandomMatchingRequest) {
         val sessionDto = sessionFactory.create(session, request)
