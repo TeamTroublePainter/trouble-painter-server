@@ -6,6 +6,7 @@ import com.xorker.draw.exception.InvalidRequestOtherPlayingException
 import com.xorker.draw.exception.InvalidRequestValueException
 import com.xorker.draw.exception.MaxRoomException
 import com.xorker.draw.exception.NotFoundRoomException
+import com.xorker.draw.lock.LockRepository
 import com.xorker.draw.room.Room
 import com.xorker.draw.room.RoomId
 import com.xorker.draw.room.RoomRepository
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 internal class MafiaGameRoomService(
     private val mafiaGameRepository: MafiaGameRepository,
     private val roomRepository: RoomRepository,
+    private val lockRepository: LockRepository,
     private val mafiaGameInfoEventProducer: MafiaGameInfoEventProducer,
 ) : UserConnectionUseCase {
 
@@ -33,7 +35,7 @@ internal class MafiaGameRoomService(
 
         val gameInfo = mafiaGameRepository.getGameInfo(roomId) ?: throw NotFoundRoomException
 
-        synchronized(gameInfo) {
+        lockRepository.lock(roomId.value) {
             if (gameInfo.phase != MafiaPhase.Wait && gameInfo.room.players.any { it.userId == user.id }.not()) {
                 throw AlreadyPlayingRoomException
             }
