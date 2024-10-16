@@ -3,6 +3,7 @@ package com.xorker.draw.mafia
 import com.xorker.draw.event.mafia.MafiaGameInfoEventProducer
 import com.xorker.draw.exception.InvalidRequestOnlyMyTurnException
 import com.xorker.draw.exception.InvalidRequestValueException
+import com.xorker.draw.lock.LockRepository
 import com.xorker.draw.mafia.dto.DrawRequest
 import com.xorker.draw.mafia.phase.MafiaPhaseInferAnswerProcessor
 import com.xorker.draw.mafia.phase.MafiaPhasePlayGameProcessor
@@ -23,6 +24,7 @@ internal class MafiaGameService(
     private val mafiaPhaseInferAnswerProcessor: MafiaPhaseInferAnswerProcessor,
     private val mafiaGameRepository: MafiaGameRepository,
     private val timerRepository: TimerRepository,
+    private val lockRepository: LockRepository,
     private val mafiaGameInfoEventProducer: MafiaGameInfoEventProducer,
 ) : MafiaGameUseCase {
 
@@ -73,6 +75,7 @@ internal class MafiaGameService(
 
         vote(phase.players, user, targetUserId)
 
+        mafiaGameRepository.saveGameInfo(gameInfo)
         mafiaGameInfoEventProducer.vote(gameInfo)
     }
 
@@ -86,6 +89,7 @@ internal class MafiaGameService(
 
         phase.answer = answer
 
+        mafiaGameRepository.saveGameInfo(gameInfo)
         mafiaGameInfoEventProducer.answer(gameInfo, answer)
     }
 
@@ -100,6 +104,8 @@ internal class MafiaGameService(
         val room = gameInfo.room
 
         timerRepository.cancelTimer(room.id)
+
+        mafiaGameRepository.saveGameInfo(gameInfo)
 
         mafiaPhaseInferAnswerProcessor.processInferAnswer(gameInfo) {
             mafiaPhaseService.endGame(gameInfo.room.id)
@@ -122,9 +128,9 @@ internal class MafiaGameService(
         voter: User,
         targetUserId: UserId,
     ) {
-        synchronized(voter) {
-            val voterUserId = voter.id
+        val voterUserId = voter.id
 
+        lockRepository.lock(voterUserId.value.toString()) {
             players.forEach { player ->
                 val userIds = player.value
 

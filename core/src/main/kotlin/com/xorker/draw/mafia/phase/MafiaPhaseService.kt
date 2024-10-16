@@ -3,6 +3,7 @@ package com.xorker.draw.mafia.phase
 import com.xorker.draw.event.mafia.MafiaGameInfoEventProducer
 import com.xorker.draw.exception.InvalidRequestValueException
 import com.xorker.draw.exception.NotFoundRoomException
+import com.xorker.draw.lock.LockRepository
 import com.xorker.draw.mafia.MafiaGameInfo
 import com.xorker.draw.mafia.MafiaGameRepository
 import com.xorker.draw.mafia.MafiaPhase
@@ -21,6 +22,7 @@ internal class MafiaPhaseService(
     private val mafiaPhaseInferAnswerProcessor: MafiaPhaseInferAnswerProcessor,
     private val mafiaPhaseEndGameProcessor: MafiaPhaseEndGameProcessor,
     private val mafiaGameInfoEventProducer: MafiaGameInfoEventProducer,
+    private val lockRepository: LockRepository,
 ) : MafiaPhaseUseCase {
 
     override fun startGame(user: User): MafiaPhase.Ready {
@@ -35,11 +37,11 @@ internal class MafiaPhaseService(
 
     private fun startGame(gameInfo: MafiaGameInfo): MafiaPhase.Ready {
         val roomId = gameInfo.room.id
-        val phase = synchronized(gameInfo) {
+
+        val phase = lockRepository.lock(roomId.value) {
             assertIs<MafiaPhase.Wait>(gameInfo.phase)
-            mafiaPhaseStartGameProcessor.startMafiaGame(gameInfo) {
-                playGame(roomId)
-            }
+
+            mafiaPhaseStartGameProcessor.startMafiaGame(gameInfo) { playGame(roomId) }
         }
 
         mafiaGameInfoEventProducer.changePhase(gameInfo)
@@ -50,12 +52,11 @@ internal class MafiaPhaseService(
     override fun playGame(roomId: RoomId): MafiaPhase.Playing {
         val gameInfo = getGameInfo(roomId)
 
-        val phase = synchronized(gameInfo) {
+        val phase = lockRepository.lock(roomId.value) {
             val readyPhase = gameInfo.phase
             assertIs<MafiaPhase.Ready>(readyPhase)
-            mafiaPhasePlayGameProcessor.playMafiaGame(gameInfo) {
-                vote(roomId)
-            }
+
+            mafiaPhasePlayGameProcessor.playMafiaGame(gameInfo) { vote(roomId) }
         }
 
         mafiaGameInfoEventProducer.changePhase(gameInfo)
@@ -66,9 +67,10 @@ internal class MafiaPhaseService(
     override fun vote(roomId: RoomId): MafiaPhase.Vote {
         val gameInfo = getGameInfo(roomId)
 
-        val phase = synchronized(gameInfo) {
+        val phase = lockRepository.lock(roomId.value) {
             val playingPhase = gameInfo.phase
             assertIs<MafiaPhase.Playing>(playingPhase)
+
             mafiaPhasePlayVoteProcessor.playVote(
                 gameInfo,
                 {
@@ -88,12 +90,11 @@ internal class MafiaPhaseService(
     override fun interAnswer(roomId: RoomId): MafiaPhase.InferAnswer {
         val gameInfo = getGameInfo(roomId)
 
-        val phase = synchronized(gameInfo) {
+        val phase = lockRepository.lock(roomId.value) {
             val votePhase = gameInfo.phase
             assertIs<MafiaPhase.Vote>(votePhase)
-            mafiaPhaseInferAnswerProcessor.playInferAnswer(gameInfo) {
-                endGame(roomId)
-            }
+
+            mafiaPhaseInferAnswerProcessor.playInferAnswer(gameInfo) { endGame(roomId) }
         }
 
         mafiaGameInfoEventProducer.changePhase(gameInfo)
@@ -104,9 +105,10 @@ internal class MafiaPhaseService(
     override fun endGame(roomId: RoomId): MafiaPhase.End {
         val gameInfo = getGameInfo(roomId)
 
-        val phase = synchronized(gameInfo) {
+        val phase = lockRepository.lock(roomId.value) {
             val votePhase = gameInfo.phase
             assert<MafiaPhase.Vote, MafiaPhase.InferAnswer>(votePhase)
+
             mafiaPhaseEndGameProcessor.endGame(gameInfo)
         }
 
