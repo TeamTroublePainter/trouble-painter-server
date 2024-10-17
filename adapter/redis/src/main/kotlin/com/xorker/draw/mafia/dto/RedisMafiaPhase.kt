@@ -12,13 +12,18 @@ data class RedisMafiaPhase @JsonCreator constructor(
     @JsonProperty("turnList") val turnList: List<RedisMafiaPlayer>? = null,
     @JsonProperty("mafiaPlayer") val mafiaPlayer: RedisMafiaPlayer? = null,
     @JsonProperty("keyword") val keyword: RedisMafiaKeyword? = null,
-    @JsonProperty("drawData") val drawData: List<Pair<Long, Map<String, Any>>>? = null,
+    @JsonProperty("drawData") val drawData: List<RedisDrawInfo>? = null,
     @JsonProperty("players") val players: Map<Long, List<Long>>? = null,
     @JsonProperty("round") val round: Int? = null,
     @JsonProperty("turn") val turn: Int? = null,
     @JsonProperty("answer") val answer: String? = null,
     @JsonProperty("showAnswer") val showAnswer: Boolean? = null,
     @JsonProperty("mafiaWin") val isMafiaWin: Boolean? = null,
+)
+
+data class RedisDrawInfo @JsonCreator constructor(
+    @JsonProperty("userId") val userId: Long,
+    @JsonProperty("draw") val draw: Map<String, Any>,
 )
 
 enum class RedisMafiaPhaseStatus {
@@ -102,7 +107,10 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
                 category = keyword.category,
             ),
             drawData = drawData.map { pair ->
-                Pair(pair.first.value, pair.second)
+                RedisDrawInfo(
+                    userId = pair.first.value,
+                    draw = pair.second,
+                )
             },
             round = turnInfo.round,
             turn = turnInfo.turn,
@@ -129,7 +137,10 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
                 category = keyword.category,
             ),
             drawData = drawData.map { pair ->
-                Pair(pair.first.value, pair.second)
+                RedisDrawInfo(
+                    userId = pair.first.value,
+                    draw = pair.second,
+                )
             },
             players = serializePlayers(this.players),
         )
@@ -155,7 +166,10 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
                 category = keyword.category,
             ),
             drawData = drawData.map { pair ->
-                Pair(pair.first.value, pair.second)
+                RedisDrawInfo(
+                    userId = pair.first.value,
+                    draw = pair.second,
+                )
             },
             answer = answer,
         )
@@ -181,7 +195,10 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
                 category = keyword.category,
             ),
             drawData = drawData.map { pair ->
-                Pair(pair.first.value, pair.second)
+                RedisDrawInfo(
+                    userId = pair.first.value,
+                    draw = pair.second,
+                )
             },
             answer = answer,
             showAnswer = showAnswer,
@@ -207,8 +224,8 @@ fun RedisMafiaPhase.toMafiaPhase(): MafiaPhase = when (status) {
         mafiaPlayer = mafiaPlayer!!.toPlayer(),
         keyword = keyword!!.toMafiaKeyword(),
         turnInfo = TurnInfo(round!!, turn!!),
-        drawData = drawData!!.map { pair ->
-            Pair(UserId(pair.first), pair.second)
+        drawData = drawData!!.map { item ->
+            Pair(UserId(item.userId), item.draw)
         }.toMutableList(),
     )
 
@@ -218,8 +235,8 @@ fun RedisMafiaPhase.toMafiaPhase(): MafiaPhase = when (status) {
         },
         mafiaPlayer = mafiaPlayer!!.toPlayer(),
         keyword = keyword!!.toMafiaKeyword(),
-        drawData = drawData!!.map { pair ->
-            Pair(UserId(pair.first), pair.second)
+        drawData = drawData!!.map { item ->
+            Pair(UserId(item.userId), item.draw)
         }.toMutableList(),
         players = deserializePlayers(players!!),
     )
@@ -230,8 +247,8 @@ fun RedisMafiaPhase.toMafiaPhase(): MafiaPhase = when (status) {
         },
         mafiaPlayer = mafiaPlayer!!.toPlayer(),
         keyword = keyword!!.toMafiaKeyword(),
-        drawData = drawData!!.map { pair ->
-            Pair(UserId(pair.first), pair.second)
+        drawData = drawData!!.map { item ->
+            Pair(UserId(item.userId), item.draw)
         }.toMutableList(),
         answer = answer,
     )
@@ -242,8 +259,8 @@ fun RedisMafiaPhase.toMafiaPhase(): MafiaPhase = when (status) {
         },
         mafiaPlayer = mafiaPlayer!!.toPlayer(),
         keyword = keyword!!.toMafiaKeyword(),
-        drawData = drawData!!.map { pair ->
-            Pair(UserId(pair.first), pair.second)
+        drawData = drawData!!.map { item ->
+            Pair(UserId(item.userId), item.draw)
         }.toMutableList(),
         answer = answer,
         showAnswer = showAnswer!!,
