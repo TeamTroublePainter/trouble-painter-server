@@ -17,4 +17,5 @@ object Versions {
     const val FIREBASE = "9.3.0"
     const val KOTEST = "6.0.0.M1"
     const val MOCKK = "1.13.12"
+    const val GOOGLE_API_CLINET = "1.32.1"
 }
