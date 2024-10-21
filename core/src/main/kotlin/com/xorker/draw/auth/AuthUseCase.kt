@@ -11,4 +11,6 @@ interface AuthUseCase {
     fun reissue(refreshToken: String): Token
 
     fun withdrawal(userId: UserId)
+
+    fun transfer(userId: UserId, authType: AuthType, token: String): Token
 }
