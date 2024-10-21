@@ -24,19 +24,19 @@ internal class AuthService(
         val platformUserId = authRepository.getPlatformUserId(authType, token)
         val user = userRepository.getUser(authType.authPlatform, platformUserId) ?: createUser(authType, platformUserId)
 
-        return createToken(user.id, Duration.ofHours(3))
+        return createToken(user.id, Duration.ofHours(3), Period.ofMonths(1))
     }
 
     override fun anonymousSignIn(): Token {
         val user = userRepository.createUser(""); // TODO 이름 정책 정해지면 변경 예정
 
-        return createToken(user.id, Period.ofYears(100))
+        return createToken(user.id, Period.ofYears(100), Period.ofYears(100))
     }
 
     override fun reissue(refreshToken: String): Token {
         val userId = refreshTokenRepository.getUserIdOrThrow(refreshToken)
 
-        return createToken(userId, Period.ofYears(100))
+        return createToken(userId, Period.ofYears(100), Period.ofYears(100))
     }
 
     @Transactional
@@ -45,16 +45,24 @@ internal class AuthService(
         userRepository.withdrawal(userId)
     }
 
+    @Transactional
+    override fun transfer(userId: UserId, authType: AuthType, token: String): Token {
+        val platformUserId = authRepository.getPlatformUserId(authType, token)
+        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId)
+
+        return createToken(user.id, Duration.ofHours(3), Period.ofMonths(1))
+    }
+
     private fun createUser(authType: AuthType, platformUserId: String): User {
         val userName = authRepository.getPlatformUserName(authType, platformUserId)
 
         return userRepository.createUser(authType.authPlatform, platformUserId, userName)
     }
 
-    private fun createToken(userId: UserId, expiredTime: TemporalAmount): Token {
+    private fun createToken(userId: UserId, atExpiredTime: TemporalAmount, rtExpiredTime: TemporalAmount): Token {
         return Token(
-            accessToken = accessTokenRepository.createAccessToken(userId, expiredTime),
-            refreshToken = refreshTokenRepository.createRefreshToken(userId),
+            accessToken = accessTokenRepository.createAccessToken(userId, atExpiredTime),
+            refreshToken = refreshTokenRepository.createRefreshToken(userId, rtExpiredTime),
             userId = userId,
         )
     }

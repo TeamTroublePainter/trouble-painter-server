@@ -43,4 +43,11 @@ class AuthController(
     fun withdrawal(principalUser: PrincipalUser) {
         authUserCase.withdrawal(principalUser.userId)
     }
+
+    @NeedLogin
+    @PostMapping("/api/v1/auth/transfer")
+    fun transfer(principalUser: PrincipalUser, @RequestBody request: AuthSignInRequest): AuthTokenResponse {
+        val token = authUserCase.transfer(principalUser.userId, request.authType, request.token)
+        return token.toResponse()
+    }
 }
