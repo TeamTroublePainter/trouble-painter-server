@@ -22,8 +22,6 @@ internal class MafiaGameResultAdapter(
 
     @Transactional
     override fun saveMafiaGameResult(gameInfo: MafiaGameInfo) {
-        println()
-        println("save mafia game result")
         val room = gameInfo.room
 
         val phase = gameInfo.phase
@@ -39,14 +37,10 @@ internal class MafiaGameResultAdapter(
 
         val mafia = phase.mafiaPlayer
         room.players.forEach { player ->
-            println(player.toString())
             val user = userJpaRepository.findByIdOrNull(player.userId.value) ?: throw NotFoundUserException
-            println(user.id)
-            val createPlayer = createPlayer(phase, mafia, player, user, gameResult)
-            println(createPlayer.toString())
+
+            createPlayer(phase, mafia, player, user, gameResult)
         }
-        println()
-        println("save save")
 
         mafiaGameResultJpaRepository.save(gameResult)
     }
