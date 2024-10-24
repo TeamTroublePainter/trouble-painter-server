@@ -7,3 +7,8 @@ data class User(
     val id: UserId,
     val name: String,
 )
+
+data class UserInfo(
+    val id: UserId,
+    val name: String?,
+)
