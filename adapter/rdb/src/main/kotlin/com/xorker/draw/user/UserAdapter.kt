@@ -1,5 +1,6 @@
 package com.xorker.draw.user
 
+import com.xorker.draw.auth.AuthInfo
 import com.xorker.draw.auth.AuthPlatform
 import com.xorker.draw.auth.AuthUserJpaEntity
 import com.xorker.draw.auth.AuthUserJpaRepository
@@ -18,6 +19,10 @@ internal class UserAdapter(
 
     override fun getUser(userId: UserId): UserInfo? =
         userJpaRepository.findByIdOrNull(userId.value)?.toDomain()
+
+    override fun getAuthInfo(userId: UserId): AuthInfo? {
+        return authUserJpaRepository.findByUserId(userId.value)?.toDomain()
+    }
 
     override fun createUser(platform: AuthPlatform, platformUserId: String, userName: String): UserInfo {
         val user = UserJpaEntity()
@@ -45,4 +50,9 @@ internal class UserAdapter(
         user.name = nickname
         return userJpaRepository.save(user).toUser()
     }
+
+    private fun AuthUserJpaEntity.toDomain(): AuthInfo = AuthInfo(
+        this.platform,
+        "sample@sample.com", // TODO
+    )
 }
