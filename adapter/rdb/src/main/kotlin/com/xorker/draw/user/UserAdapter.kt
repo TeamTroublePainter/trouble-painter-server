@@ -53,6 +53,6 @@ internal class UserAdapter(
 
     private fun AuthUserJpaEntity.toDomain(): AuthInfo = AuthInfo(
         this.platform,
-        "sample@sample.com", // TODO
+        this.email,
     )
 }
