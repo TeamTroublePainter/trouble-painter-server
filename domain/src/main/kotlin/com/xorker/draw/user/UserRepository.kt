@@ -10,7 +10,7 @@ interface UserRepository {
 
     fun getAuthInfo(userId: UserId): AuthInfo?
 
-    fun createUser(platform: AuthPlatform, platformUserId: String, userName: String): UserInfo
+    fun createUser(platform: AuthPlatform, platformUserId: String, userName: String, email: String?): UserInfo
 
     fun createUser(userName: String?): UserInfo
 

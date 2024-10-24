@@ -39,15 +39,21 @@ internal class AuthUserJpaEntity : BaseJpaEntity() {
     @Cascade(CascadeType.PERSIST)
     lateinit var user: UserJpaEntity
 
+    // TODO Alert Table SQl 문 추가하기
+    @Column(name = "email")
+    var email: String? = null
+
     companion object {
         internal fun of(
             platform: AuthPlatform,
             platformUserId: String,
             user: UserJpaEntity,
+            email: String?,
         ): AuthUserJpaEntity = AuthUserJpaEntity().apply {
             this.platform = platform
             this.platformUserId = platformUserId
             this.user = user
+            this.email = email
         }
     }
 }
