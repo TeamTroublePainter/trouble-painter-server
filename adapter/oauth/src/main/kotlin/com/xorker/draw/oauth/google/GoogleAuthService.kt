@@ -24,4 +24,13 @@ internal class GoogleAuthService(
             throw OAuthFailureException
         }
     }
+
+    fun getEmail(token: String): String? {
+        try {
+            val idToken = idTokenVerifier.verify(token)
+            return idToken?.payload?.email
+        } catch (e: GeneralSecurityException) {
+            return null
+        }
+    }
 }
