@@ -13,19 +13,19 @@ internal class UserAdapter(
     private val userJpaRepository: UserJpaRepository,
     private val authUserJpaRepository: AuthUserJpaRepository,
 ) : UserRepository {
-    override fun getUser(platform: AuthPlatform, platformUserId: String): User? =
+    override fun getUser(platform: AuthPlatform, platformUserId: String): UserInfo? =
         authUserJpaRepository.find(platform, platformUserId)?.user?.toDomain()
 
-    override fun getUser(userId: UserId): User? =
+    override fun getUser(userId: UserId): UserInfo? =
         userJpaRepository.findByIdOrNull(userId.value)?.toDomain()
 
-    override fun createUser(platform: AuthPlatform, platformUserId: String, userName: String): User {
+    override fun createUser(platform: AuthPlatform, platformUserId: String, userName: String): UserInfo {
         val user = UserJpaEntity()
         val authUser = authUserJpaRepository.save(AuthUserJpaEntity.of(platform, platformUserId, user))
         return authUser.user.toDomain()
     }
 
-    override fun createUser(userName: String): User {
+    override fun createUser(userName: String?): UserInfo {
         val user = UserJpaEntity.of(userName)
         val savedUser = userJpaRepository.save(user)
         return savedUser.toDomain()
