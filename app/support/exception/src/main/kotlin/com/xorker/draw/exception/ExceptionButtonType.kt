@@ -41,11 +41,11 @@ fun XorkerException.getButtons(): List<ExceptionButtonType> {
         NeedForceUpdateException -> buttonForceUpdate
 
         InvalidRequestValueException,
-        UnAuthorizedException,
+        is UnAuthorizedException,
         NotFoundRoomException,
         -> buttonOkClose
 
-        UnAuthenticationException,
+        is UnAuthenticationException,
         is UnknownException,
         -> buttonOkCancel
 
@@ -63,6 +63,7 @@ fun XorkerException.getButtons(): List<ExceptionButtonType> {
         AlreadyPlayingRoomException,
         InvalidWebSocketStatusException,
         is NotDefinedMessageCodeException,
+        NotFoundLockKeyException,
         -> buttonOk
     }
 }

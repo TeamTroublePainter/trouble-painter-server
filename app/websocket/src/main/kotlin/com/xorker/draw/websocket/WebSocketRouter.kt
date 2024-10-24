@@ -7,11 +7,13 @@ import com.xorker.draw.mafia.MafiaGameUseCase
 import com.xorker.draw.mafia.phase.MafiaPhaseUseCase
 import com.xorker.draw.user.UserId
 import com.xorker.draw.websocket.message.request.RequestAction
-import com.xorker.draw.websocket.message.request.dto.WebSocketRequest
-import com.xorker.draw.websocket.message.request.dto.game.MafiaGameInferAnswerRequest
-import com.xorker.draw.websocket.message.request.dto.game.MafiaGameReactionRequest
-import com.xorker.draw.websocket.message.request.dto.game.MafiaGameVoteMafiaRequest
-import org.slf4j.MDC
+import com.xorker.draw.websocket.message.request.WebSocketRequest
+import com.xorker.draw.websocket.message.request.mafia.MafiaGameInferAnswerRequest
+import com.xorker.draw.websocket.message.request.mafia.MafiaGameReactionRequest
+import com.xorker.draw.websocket.message.request.mafia.MafiaGameVoteMafiaRequest
+import com.xorker.draw.websocket.session.Session
+import com.xorker.draw.websocket.session.SessionId
+import com.xorker.draw.websocket.session.SessionManager
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.WebSocketSession
 
@@ -19,12 +21,47 @@ import org.springframework.web.socket.WebSocketSession
 internal class WebSocketRouter(
     private val objectMapper: ObjectMapper,
     private val webSocketController: WebSocketController,
-    private val sessionUseCase: SessionUseCase,
+    private val sessionManager: SessionManager,
     private val mafiaPhaseUseCase: MafiaPhaseUseCase,
     private val mafiaGameUseCase: MafiaGameUseCase,
 ) {
+    fun route(session: Session, request: WebSocketRequest) {
+        when (request.action) {
+            RequestAction.PING -> sessionManager.setPing(session.id)
+            RequestAction.INIT -> throw InvalidRequestValueException
+            RequestAction.RANDOM_MATCHING -> throw InvalidRequestValueException
+            RequestAction.REMATCHING -> webSocketController.rematch(session)
+            RequestAction.START_GAME -> mafiaPhaseUseCase.startGame(session.user)
+            RequestAction.DRAW -> mafiaGameUseCase.draw(session.user, request.extractBody())
+            RequestAction.END_TURN -> mafiaGameUseCase.nextTurnByUser(session.user)
+            RequestAction.VOTE -> {
+                val parsedRequest = request.extractBody<MafiaGameVoteMafiaRequest>()
+                mafiaGameUseCase.voteMafia(session.user, UserId(parsedRequest.userId))
+            }
+
+            RequestAction.ANSWER -> {
+                val parsedRequest = request.extractBody<MafiaGameInferAnswerRequest>()
+                mafiaGameUseCase.inferAnswer(session.user, parsedRequest.answer)
+            }
+
+            RequestAction.DECIDE_ANSWER -> {
+                val parsedRequest = request.extractBody<MafiaGameInferAnswerRequest>()
+                mafiaGameUseCase.decideAnswer(session.user, parsedRequest.answer)
+            }
+
+            RequestAction.REACTION -> {
+                val parsedRequest = request.extractBody<MafiaGameReactionRequest>()
+                mafiaGameUseCase.react(session.user, parsedRequest.reaction)
+            }
+        }
+    }
 
     fun route(session: WebSocketSession, request: WebSocketRequest) {
+        if (request.action == RequestAction.PING) {
+            sessionManager.setPing(SessionId(session.id))
+            return
+        }
+
         if (request.action == RequestAction.INIT) {
             webSocketController.initializeSession(session, request.extractBody())
             return
@@ -35,41 +72,40 @@ internal class WebSocketRouter(
             return
         }
 
-        val sessionDto = sessionUseCase.getSession(SessionId(session.id)) ?: throw InvalidRequestValueException
-        MDC.put("roomId", sessionDto.roomId.value)
+        val sessionDto = sessionManager.getSession(SessionId(session.id)) ?: throw InvalidRequestValueException
 
         when (request.action) {
+            RequestAction.PING -> throw UnSupportedException
             RequestAction.INIT -> throw UnSupportedException
             RequestAction.RANDOM_MATCHING -> throw UnSupportedException
-            RequestAction.START_GAME -> {
-                mafiaPhaseUseCase.startGame(sessionDto.roomId)
-            }
+            RequestAction.REMATCHING -> webSocketController.rematch(sessionDto)
+            RequestAction.START_GAME -> mafiaPhaseUseCase.startGame(sessionDto.user)
 
-            RequestAction.DRAW -> mafiaGameUseCase.draw(sessionDto, request.extractBody())
-            RequestAction.END_TURN -> mafiaGameUseCase.nextTurnByUser(sessionDto)
+            RequestAction.DRAW -> mafiaGameUseCase.draw(sessionDto.user, request.extractBody())
+            RequestAction.END_TURN -> mafiaGameUseCase.nextTurnByUser(sessionDto.user)
 
             RequestAction.VOTE -> {
                 val requestDto = request.extractBody<MafiaGameVoteMafiaRequest>()
 
-                mafiaGameUseCase.voteMafia(sessionDto, UserId(requestDto.userId))
+                mafiaGameUseCase.voteMafia(sessionDto.user, UserId(requestDto.userId))
             }
 
             RequestAction.ANSWER -> {
                 val requestDto = request.extractBody<MafiaGameInferAnswerRequest>()
 
-                mafiaGameUseCase.inferAnswer(sessionDto, requestDto.answer)
+                mafiaGameUseCase.inferAnswer(sessionDto.user, requestDto.answer)
             }
 
             RequestAction.DECIDE_ANSWER -> {
                 val requestDto = request.extractBody<MafiaGameInferAnswerRequest>()
 
-                mafiaGameUseCase.decideAnswer(sessionDto, requestDto.answer)
+                mafiaGameUseCase.decideAnswer(sessionDto.user, requestDto.answer)
             }
 
             RequestAction.REACTION -> {
                 val requestDto = request.extractBody<MafiaGameReactionRequest>()
 
-                mafiaGameUseCase.react(sessionDto, requestDto.reaction)
+                mafiaGameUseCase.react(sessionDto.user, requestDto.reaction)
             }
         }
     }

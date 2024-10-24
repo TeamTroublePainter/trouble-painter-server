@@ -2,6 +2,7 @@ package com.xorker.draw.room
 
 import com.xorker.draw.mafia.MafiaGameUseCase
 import com.xorker.draw.room.dto.PlayingRoomResponse
+import com.xorker.draw.support.auth.NeedLogin
 import com.xorker.draw.support.auth.PrincipalUser
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -17,10 +18,11 @@ class RoomController(
 
     @Operation(summary = "현재 참여 중인 방 정보")
     @GetMapping("/api/v1/playing-room")
+    @NeedLogin
     fun getPlayingRoom(
         @Parameter(hidden = true) user: PrincipalUser,
     ): PlayingRoomResponse {
-        val gameInfo = mafiaGameUseCase.getGameInfo(user.userId) ?: return PlayingRoomResponse()
+        val gameInfo = mafiaGameUseCase.getGameInfoByUserId(user.userId) ?: return PlayingRoomResponse()
 
         return PlayingRoomResponse(gameInfo.room.id)
     }

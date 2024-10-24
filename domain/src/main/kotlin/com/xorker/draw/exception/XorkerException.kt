@@ -9,8 +9,8 @@ sealed class XorkerException(val code: String, message: String, cause: Throwable
 sealed class ClientException(code: String, message: String, cause: Throwable? = null) : XorkerException(code, message, cause)
 
 data object NeedForceUpdateException : ClientException("forceUpdate", "인증 실패") { private fun readResolve(): Any = NeedForceUpdateException }
-data object UnAuthenticationException : ClientException("auth401", "인증 실패") { private fun readResolve(): Any = UnAuthenticationException }
-data object UnAuthorizedException : ClientException("auth403", "인가 실패") { private fun readResolve(): Any = UnAuthorizedException }
+class UnAuthenticationException(cause: Throwable? = null) : ClientException("auth401", "인증 실패", cause)
+class UnAuthorizedException(cause: Throwable? = null) : ClientException("auth403", "인가 실패", cause)
 
 data object InvalidRequestValueException : ClientException("c001", "Request 값 잘못됨") { private fun readResolve(): Any = InvalidRequestValueException }
 data object OAuthFailureException : ClientException("c002", "OAuth 인증 실패") { private fun readResolve(): Any = OAuthFailureException }
@@ -28,6 +28,7 @@ sealed class ServerException(code: String, message: String, cause: Throwable? = 
 
 data object NotFoundUserException : ServerException("s001", "유저가 존재하지 않음") { private fun readResolve(): Any = NotFoundUserException }
 data object NotFoundWordException : ServerException("s002", "단어가 존재하지 않음") { private fun readResolve(): Any = NotFoundWordException }
+data object NotFoundLockKeyException : ServerException("s003", "락 키가 존재하지 않음") { private fun readResolve(): Any = NotFoundLockKeyException }
 //endregion
 
 //region Critical
