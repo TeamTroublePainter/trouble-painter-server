@@ -12,4 +12,6 @@ interface UserRepository {
     fun createUser(userName: String?): UserInfo
 
     fun withdrawal(userId: UserId)
+
+    fun updateNickname(userId: UserId, nickname: String): User
 }
