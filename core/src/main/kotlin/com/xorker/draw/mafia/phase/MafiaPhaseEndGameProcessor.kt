@@ -8,6 +8,7 @@ import com.xorker.draw.mafia.MafiaGameResultRepository
 import com.xorker.draw.mafia.MafiaPhase
 import com.xorker.draw.mafia.assertIs
 import com.xorker.draw.timer.TimerRepository
+import java.time.Duration
 import org.springframework.stereotype.Component
 
 @Component
@@ -25,10 +26,6 @@ internal class MafiaPhaseEndGameProcessor(
 
         val room = gameInfo.room
 
-        timerRepository.startTimer(room.id, gameOption.endTime) {
-            processEndGame(gameInfo)
-        }
-
         val endPhase = assertAndGetEndPhase(phase)
 
         judgeGameResult(endPhase)
@@ -39,6 +36,15 @@ internal class MafiaPhaseEndGameProcessor(
 
         mafiaGameResultRepository.saveMafiaGameResult(gameInfo)
 
+        if (room.isRandomMatching) {
+            timerRepository.startTimer(room.id, Duration.ofMillis(1)) {
+                mafiaGameRepository.removeGameInfo(gameInfo)
+            }
+        } else {
+            timerRepository.startTimer(room.id, gameOption.endTime) {
+                processEndGame(gameInfo)
+            }
+        }
         return endPhase
     }
 

@@ -30,6 +30,7 @@ internal class WebSocketRouter(
             RequestAction.PING -> sessionManager.setPing(session.id)
             RequestAction.INIT -> throw InvalidRequestValueException
             RequestAction.RANDOM_MATCHING -> throw InvalidRequestValueException
+            RequestAction.REMATCHING -> webSocketController.rematch(session)
             RequestAction.START_GAME -> mafiaPhaseUseCase.startGame(session.user)
             RequestAction.DRAW -> mafiaGameUseCase.draw(session.user, request.extractBody())
             RequestAction.END_TURN -> mafiaGameUseCase.nextTurnByUser(session.user)
@@ -77,6 +78,7 @@ internal class WebSocketRouter(
             RequestAction.PING -> throw UnSupportedException
             RequestAction.INIT -> throw UnSupportedException
             RequestAction.RANDOM_MATCHING -> throw UnSupportedException
+            RequestAction.REMATCHING -> webSocketController.rematch(sessionDto)
             RequestAction.START_GAME -> mafiaPhaseUseCase.startGame(sessionDto.user)
 
             RequestAction.DRAW -> mafiaGameUseCase.draw(sessionDto.user, request.extractBody())

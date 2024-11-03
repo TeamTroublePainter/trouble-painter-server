@@ -11,7 +11,7 @@ internal class RedisLockAdapter(
     private val redisTemplate: RedisTemplate<String, String>,
 ) : LockRepository {
 
-    override fun lock(key: String) {
+    override fun <R> lock(key: String, call: () -> R): R {
         while (getLock(key).not()) {
             try {
                 Thread.sleep(SLEEP_TIME)
@@ -19,9 +19,14 @@ internal class RedisLockAdapter(
                 throw UnSupportedException
             }
         }
+        try {
+            return call.invoke()
+        } finally {
+            unlock(key)
+        }
     }
 
-    override fun unlock(key: String) {
+    private fun unlock(key: String) {
         redisTemplate.delete(key + LOCK)
     }
 

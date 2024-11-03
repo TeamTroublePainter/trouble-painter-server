@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.xorker.draw.mafia.MafiaKeyword
 
-data class RedisMafiaKeyword @JsonCreator constructor(
+data class MafiaKeywordRedisEntity @JsonCreator constructor(
     @JsonProperty("category") val category: String,
     @JsonProperty("answer") val answer: String,
 )
 
-fun RedisMafiaKeyword.toMafiaKeyword(): MafiaKeyword = MafiaKeyword(
+fun MafiaKeywordRedisEntity.toDomain(): MafiaKeyword = MafiaKeyword(
     answer = this.answer,
     category = this.category,
 )

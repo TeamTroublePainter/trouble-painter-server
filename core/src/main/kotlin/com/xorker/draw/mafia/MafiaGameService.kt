@@ -130,18 +130,16 @@ internal class MafiaGameService(
     ) {
         val voterUserId = voter.id
 
-        lockRepository.lock(voterUserId.value.toString())
+        lockRepository.lock(voterUserId.value.toString()) {
+            players.forEach { player ->
+                val userIds = player.value
 
-        players.forEach { player ->
-            val userIds = player.value
-
-            if (voterUserId in userIds) {
-                userIds.remove(voterUserId)
+                if (voterUserId in userIds) {
+                    userIds.remove(voterUserId)
+                }
             }
+            players[targetUserId]?.add(voterUserId) ?: InvalidRequestValueException
         }
-        players[targetUserId]?.add(voterUserId) ?: InvalidRequestValueException
-
-        lockRepository.unlock(voterUserId.value.toString())
     }
 
     private fun validateIsMafia(player: User, mafiaPlayer: MafiaPlayer) {
