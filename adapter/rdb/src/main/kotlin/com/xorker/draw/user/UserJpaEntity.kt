@@ -1,7 +1,6 @@
 package com.xorker.draw.user
 
 import com.xorker.draw.BaseJpaEntity
-import com.xorker.draw.exception.InvalidUserStatusException
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -35,7 +34,7 @@ internal class UserJpaEntity : BaseJpaEntity() {
         internal fun of(id: Long): UserJpaEntity =
             UserJpaEntity().apply { this.id = id }
 
-        internal fun of(name: String): UserJpaEntity =
+        internal fun of(name: String?): UserJpaEntity =
             UserJpaEntity().apply { this.name = name }
 
         internal fun from(user: User): UserJpaEntity =
@@ -54,7 +53,7 @@ internal class UserJpaEntity : BaseJpaEntity() {
     }
 }
 
-internal fun UserJpaEntity.toDomain(): User = User(
+internal fun UserJpaEntity.toDomain(): UserInfo = UserInfo(
     id = UserId(this.id),
-    name = this.name ?: throw InvalidUserStatusException,
+    name = this.name,
 )
