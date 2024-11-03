@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.xorker.draw.mafia.MafiaGameOption
 import java.time.Duration
 
-data class RedisMafiaGameOption @JsonCreator constructor(
+data class MafiaGameOptionRedisEntity @JsonCreator constructor(
     @JsonProperty("minimum") val minimum: Int,
     @JsonProperty("maximum") val maximum: Int,
     @JsonProperty("readyTime") val readyTime: Long,
@@ -19,7 +19,7 @@ data class RedisMafiaGameOption @JsonCreator constructor(
     @JsonProperty("endTime") val endTime: Long,
 )
 
-fun RedisMafiaGameOption.toGameOption(): MafiaGameOption = MafiaGameOption(
+fun MafiaGameOptionRedisEntity.toDomain(): MafiaGameOption = MafiaGameOption(
     minimum = this.minimum,
     maximum = this.maximum,
     readyTime = Duration.ofMillis(this.readyTime),

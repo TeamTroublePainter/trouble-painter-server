@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.xorker.draw.mafia.MafiaPlayer
 import com.xorker.draw.user.UserId
 
-data class RedisMafiaPlayer @JsonCreator constructor(
+data class MafiaPlayerRedisEntity @JsonCreator constructor(
     @JsonProperty("id") val id: Long,
     @JsonProperty("nickname") val nickname: String,
     @JsonProperty("color") val color: String,
     @JsonProperty("connect") val isConnect: Boolean,
 )
 
-fun RedisMafiaPlayer.toPlayer(): MafiaPlayer {
+fun MafiaPlayerRedisEntity.toDomain(): MafiaPlayer {
     val mafiaPlayer = MafiaPlayer(
         userId = UserId(this.id),
         nickname = this.nickname,

@@ -1,7 +1,7 @@
 package com.xorker.draw.mafia
 
-import com.xorker.draw.mafia.dto.RedisMafiaGameInfo
-import com.xorker.draw.mafia.dto.toRedisMafiaGameInfo
+import com.xorker.draw.mafia.dto.MafiaGameInfoRedisEntity
+import com.xorker.draw.mafia.dto.toMafiaGameInfoRedisEntity
 import com.xorker.draw.room.Room
 import com.xorker.draw.room.RoomId
 import com.xorker.draw.room.RoomRepository
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 internal class MafiaGameAdapter(
     private val metricManager: MetricManager,
-    private val redisTemplateWithObject: RedisTemplate<String, RedisMafiaGameInfo>,
+    private val redisTemplateWithObject: RedisTemplate<String, MafiaGameInfoRedisEntity>,
     private val redisTemplate: RedisTemplate<String, String>,
     private val timerRepository: TimerRepository,
 ) : MafiaGameRepository, RoomRepository {
@@ -34,7 +34,7 @@ internal class MafiaGameAdapter(
 
             redisTemplateWithObject
                 .opsForValue()
-                .set(room.id.value, gameInfo.toRedisMafiaGameInfo())
+                .set(room.id.value, gameInfo.toMafiaGameInfoRedisEntity())
 
             room.players.forEach {
                 redisTemplate
@@ -66,7 +66,7 @@ internal class MafiaGameAdapter(
         return redisTemplateWithObject
             .opsForValue()
             .get(roomId.value)
-            ?.toMafiaGameInfo()
+            ?.toDomain()
     }
 
     override fun getGameInfo(userId: UserId): MafiaGameInfo? {
@@ -77,7 +77,7 @@ internal class MafiaGameAdapter(
         return redisTemplateWithObject
             .opsForValue()
             .get(roomId)
-            ?.toMafiaGameInfo()
+            ?.toDomain()
     }
 
     override fun removePlayer(userId: UserId) {
@@ -88,7 +88,7 @@ internal class MafiaGameAdapter(
         return redisTemplateWithObject
             .opsForValue()
             .get(roomId.value)
-            ?.toMafiaGameInfo()
+            ?.toDomain()
             ?.room
     }
 }

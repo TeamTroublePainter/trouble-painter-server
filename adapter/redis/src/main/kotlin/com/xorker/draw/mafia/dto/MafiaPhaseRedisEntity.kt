@@ -7,12 +7,12 @@ import com.xorker.draw.mafia.turn.TurnInfo
 import com.xorker.draw.user.UserId
 import java.util.*
 
-data class RedisMafiaPhase @JsonCreator constructor(
+data class MafiaPhaseRedisEntity @JsonCreator constructor(
     @JsonProperty("status") val status: RedisMafiaPhaseStatus,
-    @JsonProperty("turnList") val turnList: List<RedisMafiaPlayer>? = null,
-    @JsonProperty("mafiaPlayer") val mafiaPlayer: RedisMafiaPlayer? = null,
-    @JsonProperty("keyword") val keyword: RedisMafiaKeyword? = null,
-    @JsonProperty("drawData") val drawData: List<RedisDrawInfo>? = null,
+    @JsonProperty("turnList") val turnList: List<MafiaPlayerRedisEntity>? = null,
+    @JsonProperty("mafiaPlayer") val mafiaPlayer: MafiaPlayerRedisEntity? = null,
+    @JsonProperty("keyword") val keyword: MafiaKeywordRedisEntity? = null,
+    @JsonProperty("drawData") val drawData: List<DrawInfoRedisEntity>? = null,
     @JsonProperty("players") val players: Map<Long, List<Long>>? = null,
     @JsonProperty("round") val round: Int? = null,
     @JsonProperty("turn") val turn: Int? = null,
@@ -21,7 +21,7 @@ data class RedisMafiaPhase @JsonCreator constructor(
     @JsonProperty("mafiaWin") val isMafiaWin: Boolean? = null,
 )
 
-data class RedisDrawInfo @JsonCreator constructor(
+data class DrawInfoRedisEntity @JsonCreator constructor(
     @JsonProperty("userId") val userId: Long,
     @JsonProperty("draw") val draw: Map<String, Any>,
 )
@@ -58,56 +58,56 @@ fun deserializePlayers(players: Map<Long, List<Long>>): Map<UserId, Vector<UserI
     return deserializedPlayers
 }
 
-fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
+fun MafiaPhase.toMafiaPhaseRedisEntity(): MafiaPhaseRedisEntity {
     return when (this) {
-        is MafiaPhase.Wait -> RedisMafiaPhase(
+        is MafiaPhase.Wait -> MafiaPhaseRedisEntity(
             status = RedisMafiaPhaseStatus.WAIT,
         )
 
-        is MafiaPhase.Ready -> RedisMafiaPhase(
+        is MafiaPhase.Ready -> MafiaPhaseRedisEntity(
             status = RedisMafiaPhaseStatus.READY,
             turnList = turnList.map { player ->
-                RedisMafiaPlayer(
+                MafiaPlayerRedisEntity(
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
                     isConnect = player.isConnect(),
                 )
             },
-            mafiaPlayer = RedisMafiaPlayer(
+            mafiaPlayer = MafiaPlayerRedisEntity(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
                 isConnect = mafiaPlayer.isConnect(),
             ),
-            keyword = RedisMafiaKeyword(
+            keyword = MafiaKeywordRedisEntity(
                 answer = keyword.answer,
                 category = keyword.category,
             ),
         )
 
-        is MafiaPhase.Playing -> RedisMafiaPhase(
+        is MafiaPhase.Playing -> MafiaPhaseRedisEntity(
             status = RedisMafiaPhaseStatus.PLAYING,
             turnList = turnList.map { player ->
-                RedisMafiaPlayer(
+                MafiaPlayerRedisEntity(
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
                     isConnect = player.isConnect(),
                 )
             },
-            mafiaPlayer = RedisMafiaPlayer(
+            mafiaPlayer = MafiaPlayerRedisEntity(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
                 isConnect = mafiaPlayer.isConnect(),
             ),
-            keyword = RedisMafiaKeyword(
+            keyword = MafiaKeywordRedisEntity(
                 answer = keyword.answer,
                 category = keyword.category,
             ),
             drawData = drawData.map { pair ->
-                RedisDrawInfo(
+                DrawInfoRedisEntity(
                     userId = pair.first.value,
                     draw = pair.second,
                 )
@@ -116,28 +116,28 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
             turn = turnInfo.turn,
         )
 
-        is MafiaPhase.Vote -> RedisMafiaPhase(
+        is MafiaPhase.Vote -> MafiaPhaseRedisEntity(
             status = RedisMafiaPhaseStatus.VOTE,
             turnList = turnList.map { player ->
-                RedisMafiaPlayer(
+                MafiaPlayerRedisEntity(
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
                     isConnect = player.isConnect(),
                 )
             },
-            mafiaPlayer = RedisMafiaPlayer(
+            mafiaPlayer = MafiaPlayerRedisEntity(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
                 isConnect = mafiaPlayer.isConnect(),
             ),
-            keyword = RedisMafiaKeyword(
+            keyword = MafiaKeywordRedisEntity(
                 answer = keyword.answer,
                 category = keyword.category,
             ),
             drawData = drawData.map { pair ->
-                RedisDrawInfo(
+                DrawInfoRedisEntity(
                     userId = pair.first.value,
                     draw = pair.second,
                 )
@@ -145,28 +145,28 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
             players = serializePlayers(this.players),
         )
 
-        is MafiaPhase.InferAnswer -> RedisMafiaPhase(
+        is MafiaPhase.InferAnswer -> MafiaPhaseRedisEntity(
             status = RedisMafiaPhaseStatus.INFER_ANSWER,
             turnList = turnList.map { player ->
-                RedisMafiaPlayer(
+                MafiaPlayerRedisEntity(
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
                     isConnect = player.isConnect(),
                 )
             },
-            mafiaPlayer = RedisMafiaPlayer(
+            mafiaPlayer = MafiaPlayerRedisEntity(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
                 isConnect = mafiaPlayer.isConnect(),
             ),
-            keyword = RedisMafiaKeyword(
+            keyword = MafiaKeywordRedisEntity(
                 answer = keyword.answer,
                 category = keyword.category,
             ),
             drawData = drawData.map { pair ->
-                RedisDrawInfo(
+                DrawInfoRedisEntity(
                     userId = pair.first.value,
                     draw = pair.second,
                 )
@@ -174,28 +174,28 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
             answer = answer,
         )
 
-        is MafiaPhase.End -> RedisMafiaPhase(
+        is MafiaPhase.End -> MafiaPhaseRedisEntity(
             status = RedisMafiaPhaseStatus.END,
             turnList = turnList.map { player ->
-                RedisMafiaPlayer(
+                MafiaPlayerRedisEntity(
                     id = player.userId.value,
                     nickname = player.nickname,
                     color = player.color,
                     isConnect = player.isConnect(),
                 )
             },
-            mafiaPlayer = RedisMafiaPlayer(
+            mafiaPlayer = MafiaPlayerRedisEntity(
                 id = mafiaPlayer.userId.value,
                 nickname = mafiaPlayer.nickname,
                 color = mafiaPlayer.color,
                 isConnect = mafiaPlayer.isConnect(),
             ),
-            keyword = RedisMafiaKeyword(
+            keyword = MafiaKeywordRedisEntity(
                 answer = keyword.answer,
                 category = keyword.category,
             ),
             drawData = drawData.map { pair ->
-                RedisDrawInfo(
+                DrawInfoRedisEntity(
                     userId = pair.first.value,
                     draw = pair.second,
                 )
@@ -207,22 +207,22 @@ fun MafiaPhase.toRedisMafiaPhase(): RedisMafiaPhase {
     }
 }
 
-fun RedisMafiaPhase.toMafiaPhase(): MafiaPhase = when (status) {
+fun MafiaPhaseRedisEntity.toDomain(): MafiaPhase = when (status) {
     RedisMafiaPhaseStatus.WAIT -> MafiaPhase.Wait
     RedisMafiaPhaseStatus.READY -> MafiaPhase.Ready(
         turnList = turnList!!.map { player ->
-            player.toPlayer()
+            player.toDomain()
         },
-        mafiaPlayer = mafiaPlayer!!.toPlayer(),
-        keyword = keyword!!.toMafiaKeyword(),
+        mafiaPlayer = mafiaPlayer!!.toDomain(),
+        keyword = keyword!!.toDomain(),
     )
 
     RedisMafiaPhaseStatus.PLAYING -> MafiaPhase.Playing(
         turnList = turnList!!.map { player ->
-            player.toPlayer()
+            player.toDomain()
         },
-        mafiaPlayer = mafiaPlayer!!.toPlayer(),
-        keyword = keyword!!.toMafiaKeyword(),
+        mafiaPlayer = mafiaPlayer!!.toDomain(),
+        keyword = keyword!!.toDomain(),
         turnInfo = TurnInfo(round!!, turn!!),
         drawData = drawData!!.map { item ->
             Pair(UserId(item.userId), item.draw)
@@ -231,10 +231,10 @@ fun RedisMafiaPhase.toMafiaPhase(): MafiaPhase = when (status) {
 
     RedisMafiaPhaseStatus.VOTE -> MafiaPhase.Vote(
         turnList = turnList!!.map { player ->
-            player.toPlayer()
+            player.toDomain()
         },
-        mafiaPlayer = mafiaPlayer!!.toPlayer(),
-        keyword = keyword!!.toMafiaKeyword(),
+        mafiaPlayer = mafiaPlayer!!.toDomain(),
+        keyword = keyword!!.toDomain(),
         drawData = drawData!!.map { item ->
             Pair(UserId(item.userId), item.draw)
         }.toMutableList(),
@@ -243,10 +243,10 @@ fun RedisMafiaPhase.toMafiaPhase(): MafiaPhase = when (status) {
 
     RedisMafiaPhaseStatus.INFER_ANSWER -> MafiaPhase.InferAnswer(
         turnList = turnList!!.map { player ->
-            player.toPlayer()
+            player.toDomain()
         },
-        mafiaPlayer = mafiaPlayer!!.toPlayer(),
-        keyword = keyword!!.toMafiaKeyword(),
+        mafiaPlayer = mafiaPlayer!!.toDomain(),
+        keyword = keyword!!.toDomain(),
         drawData = drawData!!.map { item ->
             Pair(UserId(item.userId), item.draw)
         }.toMutableList(),
@@ -255,10 +255,10 @@ fun RedisMafiaPhase.toMafiaPhase(): MafiaPhase = when (status) {
 
     RedisMafiaPhaseStatus.END -> MafiaPhase.End(
         turnList = turnList!!.map { player ->
-            player.toPlayer()
+            player.toDomain()
         },
-        mafiaPlayer = mafiaPlayer!!.toPlayer(),
-        keyword = keyword!!.toMafiaKeyword(),
+        mafiaPlayer = mafiaPlayer!!.toDomain(),
+        keyword = keyword!!.toDomain(),
         drawData = drawData!!.map { item ->
             Pair(UserId(item.userId), item.draw)
         }.toMutableList(),
