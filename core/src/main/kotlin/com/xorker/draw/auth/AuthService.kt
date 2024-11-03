@@ -5,6 +5,7 @@ import com.xorker.draw.auth.token.RefreshTokenRepository
 import com.xorker.draw.auth.token.Token
 import com.xorker.draw.user.User
 import com.xorker.draw.user.UserId
+import com.xorker.draw.user.UserInfo
 import com.xorker.draw.user.UserRepository
 import java.time.Duration
 import java.time.Period
@@ -28,7 +29,7 @@ internal class AuthService(
     }
 
     override fun anonymousSignIn(): Token {
-        val user = userRepository.createUser(""); // TODO 이름 정책 정해지면 변경 예정
+        val user = userRepository.createUser(null); // TODO 이름 정책 정해지면 변경 예정
 
         return createToken(user.id, Period.ofYears(100), Period.ofYears(100))
     }
@@ -53,7 +54,7 @@ internal class AuthService(
         return createToken(user.id, Duration.ofHours(3), Period.ofMonths(1))
     }
 
-    private fun createUser(authType: AuthType, platformUserId: String): User {
+    private fun createUser(authType: AuthType, platformUserId: String): UserInfo {
         val userName = authRepository.getPlatformUserName(authType, platformUserId)
 
         return userRepository.createUser(authType.authPlatform, platformUserId, userName)
