@@ -3,7 +3,7 @@ package com.xorker.draw.mafia
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.xorker.draw.exception.NotFoundUserException
 import com.xorker.draw.exception.NotFoundWordException
-import com.xorker.draw.player.PlayerJpaEntity
+import com.xorker.draw.player.PlayerHistoryJpaEntity
 import com.xorker.draw.player.ResultType
 import com.xorker.draw.player.RoleType
 import com.xorker.draw.user.UserJpaEntity
@@ -33,7 +33,7 @@ internal class MafiaGameResultAdapter(
         val drawData = DrawData(phase.drawData)
         val draw = objectMapper.writeValueAsString(drawData)
 
-        val gameResult = MafiaGameResultJpaEntity.of(room.locale, draw, phase.answer, word.id)
+        val gameResult = MafiaGameResultJpaEntity.of(room.locale, draw, phase.answer, room.isRandomMatching, word.id)
 
         val mafia = phase.mafiaPlayer
         room.players.forEach { player ->
@@ -53,15 +53,15 @@ internal class MafiaGameResultAdapter(
         gameResult: MafiaGameResultJpaEntity,
     ) = if (phase.isMafiaWin) {
         if (mafia.userId == player.userId) {
-            PlayerJpaEntity.of(ResultType.MAFIA_WIN, RoleType.MAFIA, user, gameResult)
+            PlayerHistoryJpaEntity.of(ResultType.MAFIA_WIN, RoleType.MAFIA, user, gameResult)
         } else {
-            PlayerJpaEntity.of(ResultType.CITIZEN_LOSE, RoleType.CITIZEN, user, gameResult)
+            PlayerHistoryJpaEntity.of(ResultType.CITIZEN_LOSE, RoleType.CITIZEN, user, gameResult)
         }
     } else {
         if (mafia.userId == player.userId) {
-            PlayerJpaEntity.of(ResultType.MAFIA_LOSE, RoleType.MAFIA, user, gameResult)
+            PlayerHistoryJpaEntity.of(ResultType.MAFIA_LOSE, RoleType.MAFIA, user, gameResult)
         } else {
-            PlayerJpaEntity.of(ResultType.CITIZEN_WIN, RoleType.CITIZEN, user, gameResult)
+            PlayerHistoryJpaEntity.of(ResultType.CITIZEN_WIN, RoleType.CITIZEN, user, gameResult)
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.xorker.draw.mafia
 
 import com.xorker.draw.BaseJpaEntity
-import com.xorker.draw.player.PlayerJpaEntity
+import com.xorker.draw.player.PlayerHistoryJpaEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -37,28 +37,33 @@ internal class MafiaGameResultJpaEntity : BaseJpaEntity() {
     var mafiaAnswer: String? = null
         protected set
 
+    @Column(name = "is_random_matching", columnDefinition = "boolean")
+    var isRandomMatching: Boolean = false
+        protected set
+
     @Column(name = "word_id", columnDefinition = "bigint")
     var wordId: Long = 0
         protected set
 
     @OneToMany(mappedBy = "mafiaGameResult", fetch = FetchType.LAZY)
     @Cascade(CascadeType.PERSIST)
-    val players: MutableList<PlayerJpaEntity> = mutableListOf()
+    val players: MutableList<PlayerHistoryJpaEntity> = mutableListOf()
 
-    fun removePlayer(player: PlayerJpaEntity) {
+    fun removePlayer(player: PlayerHistoryJpaEntity) {
         players.remove(player)
     }
 
-    fun addPlayer(player: PlayerJpaEntity) {
+    fun addPlayer(player: PlayerHistoryJpaEntity) {
         players.add(player)
     }
 
     companion object {
-        internal fun of(locale: String, draw: String, mafiaAnswer: String?, wordId: Long): MafiaGameResultJpaEntity {
+        internal fun of(locale: String, draw: String, mafiaAnswer: String?, isRandomMatching: Boolean, wordId: Long): MafiaGameResultJpaEntity {
             return MafiaGameResultJpaEntity().apply {
                 this.language = locale
                 this.draw = draw
                 this.mafiaAnswer = mafiaAnswer
+                this.isRandomMatching = isRandomMatching
                 this.wordId = wordId
             }
         }

@@ -16,8 +16,8 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "player")
-internal class PlayerJpaEntity : BaseJpaEntity() {
+@Table(name = "player_history")
+internal class PlayerHistoryJpaEntity : BaseJpaEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "player_id", nullable = false)
@@ -48,8 +48,8 @@ internal class PlayerJpaEntity : BaseJpaEntity() {
     }
 
     companion object {
-        fun of(result: ResultType, role: RoleType, user: UserJpaEntity, gameResult: MafiaGameResultJpaEntity): PlayerJpaEntity {
-            val player = PlayerJpaEntity().apply {
+        fun of(result: ResultType, role: RoleType, user: UserJpaEntity, gameResult: MafiaGameResultJpaEntity): PlayerHistoryJpaEntity {
+            val player = PlayerHistoryJpaEntity().apply {
                 this.result = result
                 this.role = role
                 this.user = user
