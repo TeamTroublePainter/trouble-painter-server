@@ -6,22 +6,22 @@ import com.xorker.draw.mafia.MafiaPlayer
 import com.xorker.draw.room.Room
 import com.xorker.draw.room.RoomId
 
-data class RedisMafiaRoom @JsonCreator constructor(
+data class MafiaRoomRedisEntity @JsonCreator constructor(
     @JsonProperty("id") val id: String,
     @JsonProperty("locale") val locale: String,
-    @JsonProperty("owner") val owner: RedisMafiaPlayer,
+    @JsonProperty("owner") val owner: MafiaPlayerRedisEntity,
     @JsonProperty("maxMemberNum") val maxMemberNum: Int,
-    @JsonProperty("players") val players: List<RedisMafiaPlayer>,
+    @JsonProperty("players") val players: List<MafiaPlayerRedisEntity>,
     @JsonProperty("randomMatching") val isRandomMatching: Boolean,
 )
 
-fun RedisMafiaRoom.toRoom(): Room<MafiaPlayer> = Room(
+fun MafiaRoomRedisEntity.toDomain(): Room<MafiaPlayer> = Room(
     id = RoomId(this.id),
     locale = this.locale,
-    owner = this.owner.toPlayer(),
+    owner = this.owner.toDomain(),
     maxMemberNum = this.maxMemberNum,
     players = this.players.map { player ->
-        player.toPlayer()
+        player.toDomain()
     }.toMutableList(),
     isRandomMatching = isRandomMatching,
 )

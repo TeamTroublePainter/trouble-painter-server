@@ -1,6 +1,6 @@
 package com.xorker.draw.config
 
-import com.xorker.draw.mafia.dto.RedisMafiaGameInfo
+import com.xorker.draw.mafia.dto.MafiaGameInfoRedisEntity
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -32,13 +32,13 @@ internal class RedisConfig {
     }
 
     @Bean
-    fun redisTemplateWithObject(connectionFactory: RedisConnectionFactory): RedisTemplate<String, RedisMafiaGameInfo> {
-        val template = RedisTemplate<String, RedisMafiaGameInfo>()
+    fun redisTemplateWithObject(connectionFactory: RedisConnectionFactory): RedisTemplate<String, MafiaGameInfoRedisEntity> {
+        val template = RedisTemplate<String, MafiaGameInfoRedisEntity>()
 
         template.connectionFactory = connectionFactory
 
         template.keySerializer = StringRedisSerializer()
-        template.valueSerializer = Jackson2JsonRedisSerializer(RedisMafiaGameInfo::class.java)
+        template.valueSerializer = Jackson2JsonRedisSerializer(MafiaGameInfoRedisEntity::class.java)
 
         return template
     }

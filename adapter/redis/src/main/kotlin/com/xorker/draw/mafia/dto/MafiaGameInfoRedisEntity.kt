@@ -4,23 +4,23 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.xorker.draw.mafia.MafiaGameInfo
 
-data class RedisMafiaGameInfo @JsonCreator constructor(
-    @JsonProperty("room") val room: RedisMafiaRoom,
-    @JsonProperty("phase") val phase: RedisMafiaPhase,
-    @JsonProperty("gameOption") val gameOption: RedisMafiaGameOption,
+data class MafiaGameInfoRedisEntity @JsonCreator constructor(
+    @JsonProperty("room") val room: MafiaRoomRedisEntity,
+    @JsonProperty("phase") val phase: MafiaPhaseRedisEntity,
+    @JsonProperty("gameOption") val gameOption: MafiaGameOptionRedisEntity,
 ) {
-    fun toMafiaGameInfo(): MafiaGameInfo = MafiaGameInfo(
-        room = room.toRoom(),
-        phase = phase.toMafiaPhase(),
-        gameOption = gameOption.toGameOption(),
+    fun toDomain(): MafiaGameInfo = MafiaGameInfo(
+        room = room.toDomain(),
+        phase = phase.toDomain(),
+        gameOption = gameOption.toDomain(),
     )
 }
 
-fun MafiaGameInfo.toRedisMafiaGameInfo(): RedisMafiaGameInfo = RedisMafiaGameInfo(
-    room = RedisMafiaRoom(
+fun MafiaGameInfo.toMafiaGameInfoRedisEntity(): MafiaGameInfoRedisEntity = MafiaGameInfoRedisEntity(
+    room = MafiaRoomRedisEntity(
         id = room.id.value,
         locale = room.locale,
-        owner = RedisMafiaPlayer(
+        owner = MafiaPlayerRedisEntity(
             id = room.owner.userId.value,
             nickname = room.owner.nickname,
             color = room.owner.color,
@@ -28,7 +28,7 @@ fun MafiaGameInfo.toRedisMafiaGameInfo(): RedisMafiaGameInfo = RedisMafiaGameInf
         ),
         maxMemberNum = room.maxMemberNum,
         players = room.players.map { player ->
-            RedisMafiaPlayer(
+            MafiaPlayerRedisEntity(
                 id = player.userId.value,
                 nickname = player.nickname,
                 color = player.color,
@@ -37,8 +37,8 @@ fun MafiaGameInfo.toRedisMafiaGameInfo(): RedisMafiaGameInfo = RedisMafiaGameInf
         },
         isRandomMatching = room.isRandomMatching,
     ),
-    phase = phase.toRedisMafiaPhase(),
-    gameOption = RedisMafiaGameOption(
+    phase = phase.toMafiaPhaseRedisEntity(),
+    gameOption = MafiaGameOptionRedisEntity(
         minimum = gameOption.minimum,
         maximum = gameOption.maximum,
         readyTime = gameOption.readyTime.toMillis(),
