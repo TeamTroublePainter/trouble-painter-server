@@ -3,7 +3,7 @@ package com.xorker.draw.auth
 import com.xorker.draw.auth.token.AccessTokenRepository
 import com.xorker.draw.auth.token.RefreshTokenRepository
 import com.xorker.draw.auth.token.Token
-import com.xorker.draw.user.User
+import com.xorker.draw.exception.AlreadyLinkedAccountException
 import com.xorker.draw.user.UserId
 import com.xorker.draw.user.UserInfo
 import com.xorker.draw.user.UserRepository
@@ -49,6 +49,7 @@ internal class AuthService(
     @Transactional
     override fun transfer(userId: UserId, authType: AuthType, token: String): Token {
         val platformUserId = authRepository.getPlatformUserId(authType, token)
+        userRepository.getUser(authType.authPlatform, platformUserId) ?: throw AlreadyLinkedAccountException
         val user = userRepository.transfer(userId, authType.authPlatform, platformUserId)
 
         return createToken(user.id, Duration.ofHours(3), Period.ofMonths(1))

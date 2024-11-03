@@ -13,5 +13,5 @@ interface UserRepository {
 
     fun withdrawal(userId: UserId)
 
-    fun transfer(userId: UserId, platform: AuthPlatform, platformUserId: String): User
+    fun transfer(userId: UserId, platform: AuthPlatform, platformUserId: String): UserInfo
 }
