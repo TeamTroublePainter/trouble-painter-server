@@ -37,4 +37,12 @@ internal class UserAdapter(
         user.withdrawal()
         userJpaRepository.save(user)
     }
+
+    @Transactional
+    override fun updateNickname(userId: UserId, nickname: String): User {
+        val user = userJpaRepository.findByIdOrNull(userId.value) ?: throw NotFoundUserException
+
+        user.name = nickname
+        return userJpaRepository.save(user).toUser()
+    }
 }
