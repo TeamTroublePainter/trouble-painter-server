@@ -24,7 +24,7 @@ internal class OAuthAdapter(
 
     override fun getPlatformEmail(authType: AuthType, platformUserId: String, token: String): String? {
         return when (authType) {
-            AuthType.APPLE_ID_TOKEN -> TODO()
+            AuthType.APPLE_ID_TOKEN -> appleAuthService.getEmail(token)
             AuthType.GOOGLE_ID_TOKEN -> googleAuthService.getEmail(token)
         }
     }

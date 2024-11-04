@@ -40,7 +40,7 @@ internal class AuthUserJpaEntity : BaseJpaEntity() {
     lateinit var user: UserJpaEntity
 
     // TODO Alert Table SQl 문 추가하기
-    @Column(name = "email")
+    @Column(name = "email", columnDefinition = "varchar(50)")
     var email: String? = null
 
     companion object {
