@@ -12,4 +12,6 @@ internal interface AuthUserJpaRepository : JpaRepository<AuthUserJpaEntity, Long
             "and au.platform=:platform ",
     )
     fun find(platform: AuthPlatform, platformUserId: String): AuthUserJpaEntity?
+
+    fun findByUserId(userId: Long): AuthUserJpaEntity?
 }
