@@ -3,6 +3,7 @@ package com.xorker.draw.auth
 import com.xorker.draw.auth.token.AccessTokenRepository
 import com.xorker.draw.auth.token.RefreshTokenRepository
 import com.xorker.draw.auth.token.Token
+import com.xorker.draw.exception.AlreadyLinkedAccountException
 import com.xorker.draw.user.UserId
 import com.xorker.draw.user.UserInfo
 import com.xorker.draw.user.UserRepository
@@ -24,25 +25,34 @@ internal class AuthService(
         val platformUserId = authRepository.getPlatformUserId(authType, token)
         val user = userRepository.getUser(authType.authPlatform, platformUserId) ?: createUser(authType, platformUserId, token)
 
-        return createToken(user.id, Duration.ofHours(3))
+        return createToken(user.id, Duration.ofHours(3), Period.ofMonths(1))
     }
 
     override fun anonymousSignIn(): Token {
         val user = userRepository.createUser(null); // TODO 이름 정책 정해지면 변경 예정
 
-        return createToken(user.id, Period.ofYears(100))
+        return createToken(user.id, Period.ofYears(100), Period.ofYears(100))
     }
 
     override fun reissue(refreshToken: String): Token {
         val userId = refreshTokenRepository.getUserIdOrThrow(refreshToken)
 
-        return createToken(userId, Period.ofYears(100))
+        return createToken(userId, Period.ofYears(100), Period.ofYears(100))
     }
 
     @Transactional
     override fun withdrawal(userId: UserId) {
         refreshTokenRepository.deleteRefreshToken(userId)
         userRepository.withdrawal(userId)
+    }
+
+    @Transactional
+    override fun transfer(userId: UserId, authType: AuthType, token: String): Token {
+        val platformUserId = authRepository.getPlatformUserId(authType, token)
+        userRepository.getUser(authType.authPlatform, platformUserId) ?: throw AlreadyLinkedAccountException
+        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId)
+
+        return createToken(user.id, Duration.ofHours(3), Period.ofMonths(1))
     }
 
     private fun createUser(authType: AuthType, platformUserId: String, token: String): UserInfo {
@@ -52,10 +62,10 @@ internal class AuthService(
         return userRepository.createUser(authType.authPlatform, platformUserId, userName, email)
     }
 
-    private fun createToken(userId: UserId, expiredTime: TemporalAmount): Token {
+    private fun createToken(userId: UserId, atExpiredTime: TemporalAmount, rtExpiredTime: TemporalAmount): Token {
         return Token(
-            accessToken = accessTokenRepository.createAccessToken(userId, expiredTime),
-            refreshToken = refreshTokenRepository.createRefreshToken(userId),
+            accessToken = accessTokenRepository.createAccessToken(userId, atExpiredTime),
+            refreshToken = refreshTokenRepository.createRefreshToken(userId, rtExpiredTime),
             userId = userId,
         )
     }

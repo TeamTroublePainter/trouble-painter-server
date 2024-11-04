@@ -9,8 +9,8 @@ sealed class XorkerException(val code: String, message: String, cause: Throwable
 sealed class ClientException(code: String, message: String, cause: Throwable? = null) : XorkerException(code, message, cause)
 
 data object NeedForceUpdateException : ClientException("forceUpdate", "인증 실패") { private fun readResolve(): Any = NeedForceUpdateException }
-data object UnAuthenticationException : ClientException("auth401", "인증 실패") { private fun readResolve(): Any = UnAuthenticationException }
-data object UnAuthorizedException : ClientException("auth403", "인가 실패") { private fun readResolve(): Any = UnAuthorizedException }
+class UnAuthenticationException(cause: Throwable? = null) : ClientException("auth401", "인증 실패", cause)
+class UnAuthorizedException(cause: Throwable? = null) : ClientException("auth403", "인가 실패", cause)
 
 data object InvalidRequestValueException : ClientException("c001", "Request 값 잘못됨") { private fun readResolve(): Any = InvalidRequestValueException }
 data object OAuthFailureException : ClientException("c002", "OAuth 인증 실패") { private fun readResolve(): Any = OAuthFailureException }
@@ -20,6 +20,7 @@ data object AlreadyJoinRoomException : ClientException("c005", "이미 참여한
 data object InvalidRequestOnlyMyTurnException : ClientException("c006", "요청자의 차례가 아니라서 처리 불가능") { private fun readResolve(): Any = InvalidRequestOnlyMyTurnException }
 data object InvalidRequestOtherPlayingException : ClientException("c007", "진행 중인 게임 방이 있습니다.") { private fun readResolve(): Any = InvalidRequestOtherPlayingException }
 data object AlreadyPlayingRoomException : ClientException("c008", "진행 중인 게임 방에는 참여할 수 없습니다.") { private fun readResolve(): Any = AlreadyPlayingRoomException }
+data object AlreadyLinkedAccountException : ClientException("c008", "진행 중인 게임 방에는 참여할 수 없습니다.") { private fun readResolve(): Any = AlreadyLinkedAccountException }
 
 //endregion
 
@@ -28,6 +29,7 @@ sealed class ServerException(code: String, message: String, cause: Throwable? = 
 
 data object NotFoundUserException : ServerException("s001", "유저가 존재하지 않음") { private fun readResolve(): Any = NotFoundUserException }
 data object NotFoundWordException : ServerException("s002", "단어가 존재하지 않음") { private fun readResolve(): Any = NotFoundWordException }
+data object NotFoundLockKeyException : ServerException("s003", "락 키가 존재하지 않음") { private fun readResolve(): Any = NotFoundLockKeyException }
 //endregion
 
 //region Critical
