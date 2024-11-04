@@ -1,11 +1,14 @@
 package com.xorker.draw.user
 
+import com.xorker.draw.auth.AuthInfo
 import com.xorker.draw.auth.AuthPlatform
 
 interface UserRepository {
     fun getUser(platform: AuthPlatform, platformUserId: String): UserInfo?
 
     fun getUser(userId: UserId): UserInfo?
+
+    fun getAuthInfo(userId: UserId): AuthInfo?
 
     fun createUser(platform: AuthPlatform, platformUserId: String, userName: String): UserInfo
 
@@ -14,4 +17,6 @@ interface UserRepository {
     fun withdrawal(userId: UserId)
 
     fun transfer(userId: UserId, platform: AuthPlatform, platformUserId: String): UserInfo
+
+    fun updateNickname(userId: UserId, nickname: String): User
 }
