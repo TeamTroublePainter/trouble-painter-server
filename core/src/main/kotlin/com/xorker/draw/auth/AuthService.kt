@@ -50,7 +50,8 @@ internal class AuthService(
     override fun transfer(userId: UserId, authType: AuthType, token: String): Token {
         val platformUserId = authRepository.getPlatformUserId(authType, token)
         userRepository.getUser(authType.authPlatform, platformUserId) ?: throw AlreadyLinkedAccountException
-        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId)
+        val email = authRepository.getPlatformEmail(authType, platformUserId, token)
+        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId, email)
 
         return createToken(user.id, Duration.ofHours(3), Period.ofMonths(1))
     }
