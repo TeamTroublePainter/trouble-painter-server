@@ -64,6 +64,8 @@ fun XorkerException.getButtons(): List<ExceptionButtonType> {
         InvalidWebSocketStatusException,
         is NotDefinedMessageCodeException,
         NotFoundLockKeyException,
+        AlreadyPlayingPlayerException,
         -> buttonOk
+
     }
 }

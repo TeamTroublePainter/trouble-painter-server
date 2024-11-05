@@ -2,6 +2,7 @@ package com.xorker.draw.websocket.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.xorker.draw.auth.token.TokenUseCase
+import com.xorker.draw.exception.AlreadyPlayingPlayerException
 import com.xorker.draw.exception.InvalidRequestValueException
 import com.xorker.draw.exception.UnAuthenticationException
 import com.xorker.draw.mafia.MafiaGameUseCase
@@ -42,6 +43,11 @@ internal abstract class BaseWebSocketHandler(
     override fun afterConnectionEstablished(session: WebSocketSession) {
         registerRequestId()
         val user = getUser(session) ?: throw UnAuthenticationException()
+
+        if(sessionManager.getSession(user.id) != null) {
+            throw AlreadyPlayingPlayerException
+        }
+
         val locale = session.getHeader(HEADER_LOCALE) ?: throw InvalidRequestValueException
 
         val sessionDto = SessionWrapper(session, user, locale)
