@@ -5,12 +5,14 @@ import com.xorker.draw.auth.token.TokenUseCase
 import com.xorker.draw.exception.AlreadyPlayingPlayerException
 import com.xorker.draw.exception.InvalidRequestValueException
 import com.xorker.draw.exception.UnAuthenticationException
+import com.xorker.draw.exception.XorkerException
 import com.xorker.draw.mafia.MafiaGameUseCase
 import com.xorker.draw.support.logging.defaultApiJsonMap
 import com.xorker.draw.support.logging.logger
 import com.xorker.draw.support.logging.registerRequestId
 import com.xorker.draw.user.User
 import com.xorker.draw.user.UserId
+import com.xorker.draw.websocket.exception.WebSocketExceptionHandler
 import com.xorker.draw.websocket.message.request.RequestAction
 import com.xorker.draw.websocket.message.request.WebSocketRequest
 import com.xorker.draw.websocket.message.request.WebSocketRequestParser
@@ -33,6 +35,7 @@ internal abstract class BaseWebSocketHandler(
     private val parser: WebSocketRequestParser,
     private val tokenUseCase: TokenUseCase,
     private val gameUseCase: MafiaGameUseCase,
+    private val webSocketExceptionHandler: WebSocketExceptionHandler,
 ) : TextWebSocketHandler() {
     private val logger = logger()
 
@@ -41,23 +44,26 @@ internal abstract class BaseWebSocketHandler(
     abstract fun afterDisconnect(session: Session?, status: CloseStatus)
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        registerRequestId()
-        val user = getUser(session) ?: throw UnAuthenticationException()
-
-        if(sessionManager.getSession(user.id) != null) {
-            throw AlreadyPlayingPlayerException
-        }
-
-        val locale = session.getHeader(HEADER_LOCALE) ?: throw InvalidRequestValueException
-
-        val sessionDto = SessionWrapper(session, user, locale)
-        setupMdc(sessionDto)
-        sessionManager.registerSession(sessionDto)
-
         try {
+            registerRequestId()
+            val user = getUser(session) ?: throw UnAuthenticationException()
+
+            if (sessionManager.getSession(user.id) != null) {
+                throw AlreadyPlayingPlayerException
+            }
+
+            val locale = session.getHeader(HEADER_LOCALE) ?: throw InvalidRequestValueException
+
+            val sessionDto = SessionWrapper(session, user, locale)
+            setupMdc(sessionDto)
+            sessionManager.registerSession(sessionDto)
+
             afterConnect(sessionDto)
+        } catch (ex: XorkerException) {
+            webSocketExceptionHandler.handleXorkerException(session, RequestAction.INIT, ex)
+            throw ex
         } finally {
-            log(sessionDto.id, "WS_CONNECT")
+            log(SessionId(session.id), "WS_CONNECT")
             MDC.clear()
         }
     }
@@ -79,6 +85,8 @@ internal abstract class BaseWebSocketHandler(
 
         try {
             action(sessionDto, request)
+        } catch (ex: XorkerException) {
+            webSocketExceptionHandler.handleXorkerException(session, request.action, ex)
         } finally {
             log(sessionId, request)
             MDC.clear()

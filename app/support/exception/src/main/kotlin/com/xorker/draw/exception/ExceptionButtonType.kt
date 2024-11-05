@@ -66,6 +66,5 @@ fun XorkerException.getButtons(): List<ExceptionButtonType> {
         NotFoundLockKeyException,
         AlreadyPlayingPlayerException,
         -> buttonOk
-
     }
 }
