@@ -20,24 +20,37 @@ internal class AuthService(
     private val accessTokenRepository: AccessTokenRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
 ) : AuthUseCase {
+
     @Transactional
     override fun signIn(authType: AuthType, token: String): Token {
         val platformUserId = authRepository.getPlatformUserId(authType, token)
         val user = userRepository.getUser(authType.authPlatform, platformUserId) ?: createUser(authType, platformUserId)
 
-        return createToken(user.id, Duration.ofHours(3), Period.ofMonths(1))
+        return createToken(
+            userId = user.id,
+            atExpiredTime = Duration.ofHours(ACCESS_TOKEN_EXPIRATION_TIME),
+            rtExpiredTime = Period.ofMonths(REFRESH_TOKEN_EXPIRATION_TIME),
+        )
     }
 
     override fun anonymousSignIn(): Token {
-        val user = userRepository.createUser(null); // TODO 이름 정책 정해지면 변경 예정
+        val user = userRepository.createUser(null)
 
-        return createToken(user.id, Period.ofYears(100), Period.ofYears(100))
+        return createToken(
+            userId = user.id,
+            atExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+            rtExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+        )
     }
 
     override fun reissue(refreshToken: String): Token {
         val userId = refreshTokenRepository.getUserIdOrThrow(refreshToken)
 
-        return createToken(userId, Period.ofYears(100), Period.ofYears(100))
+        return createToken(
+            userId = userId,
+            atExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+            rtExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+        )
     }
 
     @Transactional
@@ -49,10 +62,19 @@ internal class AuthService(
     @Transactional
     override fun transfer(userId: UserId, authType: AuthType, token: String): Token {
         val platformUserId = authRepository.getPlatformUserId(authType, token)
+
         userRepository.getUser(authType.authPlatform, platformUserId) ?: throw AlreadyLinkedAccountException
+
+        val authInfo = userRepository.getAuthInfo(userId)
+        if (authInfo != null) throw AlreadyLinkedAccountException
+
         val user = userRepository.transfer(userId, authType.authPlatform, platformUserId)
 
-        return createToken(user.id, Duration.ofHours(3), Period.ofMonths(1))
+        return createToken(
+            userId = user.id,
+            atExpiredTime = Duration.ofHours(ACCESS_TOKEN_EXPIRATION_TIME),
+            rtExpiredTime = Period.ofMonths(REFRESH_TOKEN_EXPIRATION_TIME),
+        )
     }
 
     private fun createUser(authType: AuthType, platformUserId: String): UserInfo {
@@ -67,5 +89,11 @@ internal class AuthService(
             refreshToken = refreshTokenRepository.createRefreshToken(userId, rtExpiredTime),
             userId = userId,
         )
+    }
+
+    companion object {
+        private const val ACCESS_TOKEN_EXPIRATION_TIME = 3L
+        private const val REFRESH_TOKEN_EXPIRATION_TIME = 1
+        private const val ANONYMOUS_EXPIRATION_TIME = 100
     }
 }
