@@ -3,6 +3,7 @@ package com.xorker.draw.auth
 import com.xorker.draw.auth.token.AccessTokenRepository
 import com.xorker.draw.auth.token.RefreshTokenRepository
 import com.xorker.draw.auth.token.Token
+import com.xorker.draw.exception.AlreadyLinkedAccountException
 import com.xorker.draw.user.UserId
 import com.xorker.draw.user.UserInfo
 import com.xorker.draw.user.UserRepository
@@ -19,24 +20,37 @@ internal class AuthService(
     private val accessTokenRepository: AccessTokenRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
 ) : AuthUseCase {
+
     @Transactional
     override fun signIn(authType: AuthType, token: String): Token {
         val platformUserId = authRepository.getPlatformUserId(authType, token)
         val user = userRepository.getUser(authType.authPlatform, platformUserId) ?: createUser(authType, platformUserId, token)
 
-        return createToken(user.id, Duration.ofHours(3))
+        return createToken(
+            userId = user.id,
+            atExpiredTime = Duration.ofHours(ACCESS_TOKEN_EXPIRATION_TIME),
+            rtExpiredTime = Period.ofMonths(REFRESH_TOKEN_EXPIRATION_TIME),
+        )
     }
 
     override fun anonymousSignIn(): Token {
-        val user = userRepository.createUser(null); // TODO 이름 정책 정해지면 변경 예정
+        val user = userRepository.createUser(null)
 
-        return createToken(user.id, Period.ofYears(100))
+        return createToken(
+            userId = user.id,
+            atExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+            rtExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+        )
     }
 
     override fun reissue(refreshToken: String): Token {
         val userId = refreshTokenRepository.getUserIdOrThrow(refreshToken)
 
-        return createToken(userId, Period.ofYears(100))
+        return createToken(
+            userId = userId,
+            atExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+            rtExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+        )
     }
 
     @Transactional
@@ -45,6 +59,25 @@ internal class AuthService(
         userRepository.withdrawal(userId)
     }
 
+    @Transactional
+    override fun transfer(userId: UserId, authType: AuthType, token: String): Token {
+        val platformUserId = authRepository.getPlatformUserId(authType, token)
+
+        userRepository.getUser(authType.authPlatform, platformUserId) ?: throw AlreadyLinkedAccountException
+
+        val authInfo = userRepository.getAuthInfo(userId)
+        if (authInfo != null) throw AlreadyLinkedAccountException
+
+        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId)
+
+        return createToken(
+            userId = user.id,
+            atExpiredTime = Duration.ofHours(ACCESS_TOKEN_EXPIRATION_TIME),
+            rtExpiredTime = Period.ofMonths(REFRESH_TOKEN_EXPIRATION_TIME),
+        )
+    }
+
+    private fun createUser(authType: AuthType, platformUserId: String): UserInfo {
     private fun createUser(authType: AuthType, platformUserId: String, token: String): UserInfo {
         val userName = authRepository.getPlatformUserName(authType, platformUserId)
         val email = authRepository.getPlatformEmail(authType, platformUserId, token)
@@ -52,11 +85,17 @@ internal class AuthService(
         return userRepository.createUser(authType.authPlatform, platformUserId, userName, email)
     }
 
-    private fun createToken(userId: UserId, expiredTime: TemporalAmount): Token {
+    private fun createToken(userId: UserId, atExpiredTime: TemporalAmount, rtExpiredTime: TemporalAmount): Token {
         return Token(
-            accessToken = accessTokenRepository.createAccessToken(userId, expiredTime),
-            refreshToken = refreshTokenRepository.createRefreshToken(userId),
+            accessToken = accessTokenRepository.createAccessToken(userId, atExpiredTime),
+            refreshToken = refreshTokenRepository.createRefreshToken(userId, rtExpiredTime),
             userId = userId,
         )
+    }
+
+    companion object {
+        private const val ACCESS_TOKEN_EXPIRATION_TIME = 3L
+        private const val REFRESH_TOKEN_EXPIRATION_TIME = 1
+        private const val ANONYMOUS_EXPIRATION_TIME = 100
     }
 }
