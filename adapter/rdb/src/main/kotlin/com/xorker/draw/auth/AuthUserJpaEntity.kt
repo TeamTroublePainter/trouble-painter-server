@@ -34,14 +34,13 @@ internal class AuthUserJpaEntity : BaseJpaEntity() {
     lateinit var platformUserId: String
         protected set
 
+    @Column(name = "email", columnDefinition = "varchar(100)")
+    var email: String? = null
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @Cascade(CascadeType.PERSIST)
     lateinit var user: UserJpaEntity
-
-    // TODO Alert Table SQl 문 추가하기
-    @Column(name = "email", columnDefinition = "varchar(50)")
-    var email: String? = null
 
     companion object {
         internal fun of(
