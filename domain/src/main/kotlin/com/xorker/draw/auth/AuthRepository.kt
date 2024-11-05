@@ -5,5 +5,5 @@ interface AuthRepository {
 
     fun getPlatformUserName(authType: AuthType, platformUserId: String): String
 
-    fun getPlatformEmail(authType: AuthType, platformUserId: String, token: String): String?
+    fun getPlatformEmail(authType: AuthType, token: String): String?
 }

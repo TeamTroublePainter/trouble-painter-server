@@ -44,9 +44,9 @@ internal class UserAdapter(
     }
 
     @Transactional
-    override fun transfer(userId: UserId, platform: AuthPlatform, platformUserId: String): UserInfo {
+    override fun transfer(userId: UserId, platform: AuthPlatform, platformUserId: String, email: String?): UserInfo {
         val user = userJpaRepository.findByIdOrNull(userId.value) ?: throw NotFoundUserException
-        val authUser = authUserJpaRepository.save(AuthUserJpaEntity.of(platform, platformUserId, user))
+        val authUser = authUserJpaRepository.save(AuthUserJpaEntity.of(platform, platformUserId, user, email))
         return authUser.user.toDomain()
     }
 

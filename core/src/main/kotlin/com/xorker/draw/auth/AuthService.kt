@@ -68,7 +68,8 @@ internal class AuthService(
         val authInfo = userRepository.getAuthInfo(userId)
         if (authInfo != null) throw AlreadyLinkedAccountException
 
-        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId)
+        val email = authRepository.getPlatformEmail(authType, token)
+        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId, email)
 
         return createToken(
             userId = user.id,
@@ -77,10 +78,9 @@ internal class AuthService(
         )
     }
 
-    private fun createUser(authType: AuthType, platformUserId: String): UserInfo {
     private fun createUser(authType: AuthType, platformUserId: String, token: String): UserInfo {
         val userName = authRepository.getPlatformUserName(authType, platformUserId)
-        val email = authRepository.getPlatformEmail(authType, platformUserId, token)
+        val email = authRepository.getPlatformEmail(authType, token)
 
         return userRepository.createUser(authType.authPlatform, platformUserId, userName, email)
     }
