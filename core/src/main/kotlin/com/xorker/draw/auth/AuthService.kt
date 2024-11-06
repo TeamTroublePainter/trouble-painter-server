@@ -3,6 +3,7 @@ package com.xorker.draw.auth
 import com.xorker.draw.auth.token.AccessTokenRepository
 import com.xorker.draw.auth.token.RefreshTokenRepository
 import com.xorker.draw.auth.token.Token
+import com.xorker.draw.config.TokenProperties
 import com.xorker.draw.exception.AlreadyLinkedAccountException
 import com.xorker.draw.user.UserId
 import com.xorker.draw.user.UserInfo
@@ -19,6 +20,7 @@ internal class AuthService(
     private val userRepository: UserRepository,
     private val accessTokenRepository: AccessTokenRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
+    private val tokenProperties: TokenProperties,
 ) : AuthUseCase {
 
     @Transactional
@@ -28,8 +30,8 @@ internal class AuthService(
 
         return createToken(
             userId = user.id,
-            atExpiredTime = Duration.ofHours(ACCESS_TOKEN_EXPIRATION_TIME),
-            rtExpiredTime = Period.ofMonths(REFRESH_TOKEN_EXPIRATION_TIME),
+            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour),
+            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth),
         )
     }
 
@@ -38,8 +40,8 @@ internal class AuthService(
 
         return createToken(
             userId = user.id,
-            atExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
-            rtExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+            accessTokenExpirationTime = Period.ofYears(tokenProperties.anonymousExpirationYear),
+            refreshTokenExpirationTime = Period.ofYears(tokenProperties.anonymousExpirationYear),
         )
     }
 
@@ -48,8 +50,8 @@ internal class AuthService(
 
         return createToken(
             userId = userId,
-            atExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
-            rtExpiredTime = Period.ofYears(ANONYMOUS_EXPIRATION_TIME),
+            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour),
+            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth),
         )
     }
 
@@ -63,18 +65,15 @@ internal class AuthService(
     override fun transfer(userId: UserId, authType: AuthType, token: String): Token {
         val platformUserId = authRepository.getPlatformUserId(authType, token)
 
-        userRepository.getUser(authType.authPlatform, platformUserId) ?: throw AlreadyLinkedAccountException
-
-        val authInfo = userRepository.getAuthInfo(userId)
-        if (authInfo != null) throw AlreadyLinkedAccountException
+        validateIsAnonymousUser(authType, platformUserId, userId)
 
         val email = authRepository.getPlatformEmail(authType, token)
         val user = userRepository.transfer(userId, authType.authPlatform, platformUserId, email)
 
         return createToken(
             userId = user.id,
-            atExpiredTime = Duration.ofHours(ACCESS_TOKEN_EXPIRATION_TIME),
-            rtExpiredTime = Period.ofMonths(REFRESH_TOKEN_EXPIRATION_TIME),
+            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour),
+            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth),
         )
     }
 
@@ -85,17 +84,33 @@ internal class AuthService(
         return userRepository.createUser(authType.authPlatform, platformUserId, userName, email)
     }
 
-    private fun createToken(userId: UserId, atExpiredTime: TemporalAmount, rtExpiredTime: TemporalAmount): Token {
-        return Token(
-            accessToken = accessTokenRepository.createAccessToken(userId, atExpiredTime),
-            refreshToken = refreshTokenRepository.createRefreshToken(userId, rtExpiredTime),
-            userId = userId,
-        )
+    private fun validateIsAnonymousUser(
+        authType: AuthType,
+        platformUserId: String,
+        userId: UserId,
+    ) {
+        val findUser = userRepository.getUser(authType.authPlatform, platformUserId)
+        if (findUser != null) throw AlreadyLinkedAccountException
+
+        val authInfo = userRepository.getAuthInfo(userId)
+        if (authInfo != null) throw AlreadyLinkedAccountException
     }
 
-    companion object {
-        private const val ACCESS_TOKEN_EXPIRATION_TIME = 3L
-        private const val REFRESH_TOKEN_EXPIRATION_TIME = 1
-        private const val ANONYMOUS_EXPIRATION_TIME = 100
+    private fun createToken(
+        userId: UserId,
+        accessTokenExpirationTime: TemporalAmount,
+        refreshTokenExpirationTime: TemporalAmount,
+    ): Token {
+        return Token(
+            accessToken = accessTokenRepository.createAccessToken(
+                userId = userId,
+                expiredTime = accessTokenExpirationTime,
+            ),
+            refreshToken = refreshTokenRepository.createRefreshToken(
+                userId = userId,
+                expiredTime = refreshTokenExpirationTime,
+            ),
+            userId = userId,
+        )
     }
 }
