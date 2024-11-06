@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(value = "token")
 data class TokenProperties(
-    val accessTokenExpirationHour: String,
-    val refreshTokenExpirationMonth: String,
-    val anonymousExpirationYear: String,
+    val accessTokenExpirationHour: Long,
+    val refreshTokenExpirationMonth: Int,
+    val anonymousExpirationYear: Int,
 )

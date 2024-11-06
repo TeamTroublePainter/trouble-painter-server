@@ -30,8 +30,8 @@ internal class AuthService(
 
         return createToken(
             userId = user.id,
-            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour.toLong()),
-            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth.toInt()),
+            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour),
+            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth),
         )
     }
 
@@ -40,8 +40,8 @@ internal class AuthService(
 
         return createToken(
             userId = user.id,
-            accessTokenExpirationTime = Period.ofYears(tokenProperties.anonymousExpirationYear.toInt()),
-            refreshTokenExpirationTime = Period.ofYears(tokenProperties.anonymousExpirationYear.toInt()),
+            accessTokenExpirationTime = Period.ofYears(tokenProperties.anonymousExpirationYear),
+            refreshTokenExpirationTime = Period.ofYears(tokenProperties.anonymousExpirationYear),
         )
     }
 
@@ -50,8 +50,8 @@ internal class AuthService(
 
         return createToken(
             userId = userId,
-            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour.toLong()),
-            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth.toInt()),
+            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour),
+            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth),
         )
     }
 
@@ -71,8 +71,8 @@ internal class AuthService(
 
         return createToken(
             userId = user.id,
-            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour.toLong()),
-            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth.toInt()),
+            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour),
+            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth),
         )
     }
 
