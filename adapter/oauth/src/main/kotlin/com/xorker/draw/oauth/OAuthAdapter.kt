@@ -21,4 +21,11 @@ internal class OAuthAdapter(
     override fun getPlatformUserName(authType: AuthType, platformUserId: String): String {
         return ""
     }
+
+    override fun getPlatformEmail(authType: AuthType, token: String): String? {
+        return when (authType) {
+            AuthType.APPLE_ID_TOKEN -> appleAuthService.getEmail(token)
+            AuthType.GOOGLE_ID_TOKEN -> googleAuthService.getEmail(token)
+        }
+    }
 }

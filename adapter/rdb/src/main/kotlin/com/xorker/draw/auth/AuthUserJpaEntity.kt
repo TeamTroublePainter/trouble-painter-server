@@ -34,6 +34,9 @@ internal class AuthUserJpaEntity : BaseJpaEntity() {
     lateinit var platformUserId: String
         protected set
 
+    @Column(name = "email", columnDefinition = "varchar(100)")
+    var email: String? = null
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @Cascade(CascadeType.PERSIST)
@@ -44,10 +47,12 @@ internal class AuthUserJpaEntity : BaseJpaEntity() {
             platform: AuthPlatform,
             platformUserId: String,
             user: UserJpaEntity,
+            email: String?,
         ): AuthUserJpaEntity = AuthUserJpaEntity().apply {
             this.platform = platform
             this.platformUserId = platformUserId
             this.user = user
+            this.email = email
         }
     }
 }

@@ -24,7 +24,7 @@ internal class AuthService(
     @Transactional
     override fun signIn(authType: AuthType, token: String): Token {
         val platformUserId = authRepository.getPlatformUserId(authType, token)
-        val user = userRepository.getUser(authType.authPlatform, platformUserId) ?: createUser(authType, platformUserId)
+        val user = userRepository.getUser(authType.authPlatform, platformUserId) ?: createUser(authType, platformUserId, token)
 
         return createToken(
             userId = user.id,
@@ -65,7 +65,8 @@ internal class AuthService(
 
         validateIsAnonymousUser(authType, platformUserId, userId)
 
-        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId)
+        val email = authRepository.getPlatformEmail(authType, token)
+        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId, email)
 
         return createToken(
             userId = user.id,
@@ -74,10 +75,11 @@ internal class AuthService(
         )
     }
 
-    private fun createUser(authType: AuthType, platformUserId: String): UserInfo {
+    private fun createUser(authType: AuthType, platformUserId: String, token: String): UserInfo {
         val userName = authRepository.getPlatformUserName(authType, platformUserId)
+        val email = authRepository.getPlatformEmail(authType, token)
 
-        return userRepository.createUser(authType.authPlatform, platformUserId, userName)
+        return userRepository.createUser(authType.authPlatform, platformUserId, userName, email)
     }
 
     private fun validateIsAnonymousUser(
