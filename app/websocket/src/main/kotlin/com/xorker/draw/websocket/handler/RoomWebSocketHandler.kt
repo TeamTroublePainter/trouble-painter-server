@@ -5,6 +5,7 @@ import com.xorker.draw.auth.token.TokenUseCase
 import com.xorker.draw.mafia.MafiaGameUseCase
 import com.xorker.draw.mafia.UserConnectionUseCase
 import com.xorker.draw.room.RoomId
+import com.xorker.draw.user.UserUseCase
 import com.xorker.draw.websocket.WebSocketRouter
 import com.xorker.draw.websocket.exception.WebSocketExceptionHandler
 import com.xorker.draw.websocket.message.request.WebSocketRequest
@@ -21,6 +22,7 @@ internal class RoomWebSocketHandler(
     parser: WebSocketRequestParser,
     tokenUseCase: TokenUseCase,
     gameUseCase: MafiaGameUseCase,
+    userUseCase: UserUseCase,
     webSocketExceptionHandler: WebSocketExceptionHandler,
     private val userConnectionUseCase: UserConnectionUseCase,
     private val router: WebSocketRouter,
@@ -31,6 +33,7 @@ internal class RoomWebSocketHandler(
     tokenUseCase,
     gameUseCase,
     webSocketExceptionHandler,
+    userUseCase,
 ) {
     override fun afterConnect(session: Session) {
         userConnectionUseCase.connectUser(

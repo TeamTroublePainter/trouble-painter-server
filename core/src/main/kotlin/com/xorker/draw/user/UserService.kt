@@ -1,6 +1,5 @@
 package com.xorker.draw.user
 
-import com.xorker.draw.exception.NotFoundUserException
 import org.springframework.stereotype.Service
 
 @Service

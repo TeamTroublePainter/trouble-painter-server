@@ -5,6 +5,7 @@ import com.xorker.draw.auth.token.TokenUseCase
 import com.xorker.draw.mafia.MafiaGameUseCase
 import com.xorker.draw.mafia.UserConnectionUseCase
 import com.xorker.draw.mafia.WaitingQueueUseCase
+import com.xorker.draw.user.UserUseCase
 import com.xorker.draw.websocket.WebSocketRouter
 import com.xorker.draw.websocket.exception.WebSocketExceptionHandler
 import com.xorker.draw.websocket.message.request.WebSocketRequest
@@ -21,6 +22,7 @@ internal class QuickWebSocketHandler(
     parser: WebSocketRequestParser,
     tokenUseCase: TokenUseCase,
     gameUseCase: MafiaGameUseCase,
+    userUseCase: UserUseCase,
     webSocketExceptionHandler: WebSocketExceptionHandler,
     private val userConnectionUseCase: UserConnectionUseCase,
     private val router: WebSocketRouter,
@@ -32,6 +34,7 @@ internal class QuickWebSocketHandler(
     tokenUseCase,
     gameUseCase,
     webSocketExceptionHandler,
+    userUseCase,
 ) {
     override fun afterConnect(session: Session) {
         waitingQueueUseCase.enqueue(session.user, session.locale)
