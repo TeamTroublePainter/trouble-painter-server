@@ -1,4 +1,0 @@
-token:
-    access-token-expiration-hour: ${ACCESS_TOKEN_EXPIRATION_HOUR}
-    refresh-token-expiration-month: ${REFRESH_TOKEN_EXPIRATION_MONTH}
-    anonymous-expiration-year: ${ANONYMOUS_EXPIRATION_YEAR}
