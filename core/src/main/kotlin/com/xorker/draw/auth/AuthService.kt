@@ -3,7 +3,6 @@ package com.xorker.draw.auth
 import com.xorker.draw.auth.token.AccessTokenRepository
 import com.xorker.draw.auth.token.RefreshTokenRepository
 import com.xorker.draw.auth.token.Token
-import com.xorker.draw.config.TokenProperties
 import com.xorker.draw.exception.AlreadyLinkedAccountException
 import com.xorker.draw.user.UserId
 import com.xorker.draw.user.UserInfo
@@ -20,7 +19,6 @@ internal class AuthService(
     private val userRepository: UserRepository,
     private val accessTokenRepository: AccessTokenRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
-    private val tokenProperties: TokenProperties,
 ) : AuthUseCase {
 
     @Transactional
@@ -30,8 +28,8 @@ internal class AuthService(
 
         return createToken(
             userId = user.id,
-            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour),
-            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth),
+            accessTokenExpirationTime = Duration.ofHours(3),
+            refreshTokenExpirationTime = Period.ofMonths(1),
         )
     }
 
@@ -40,8 +38,8 @@ internal class AuthService(
 
         return createToken(
             userId = user.id,
-            accessTokenExpirationTime = Period.ofYears(tokenProperties.anonymousExpirationYear),
-            refreshTokenExpirationTime = Period.ofYears(tokenProperties.anonymousExpirationYear),
+            accessTokenExpirationTime = Period.ofYears(100),
+            refreshTokenExpirationTime = Period.ofYears(100),
         )
     }
 
@@ -50,8 +48,8 @@ internal class AuthService(
 
         return createToken(
             userId = userId,
-            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour),
-            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth),
+            accessTokenExpirationTime = Duration.ofHours(3),
+            refreshTokenExpirationTime = Period.ofMonths(1),
         )
     }
 
@@ -71,8 +69,8 @@ internal class AuthService(
 
         return createToken(
             userId = user.id,
-            accessTokenExpirationTime = Duration.ofHours(tokenProperties.accessTokenExpirationHour),
-            refreshTokenExpirationTime = Period.ofMonths(tokenProperties.refreshTokenExpirationMonth),
+            accessTokenExpirationTime = Duration.ofHours(3),
+            refreshTokenExpirationTime = Period.ofMonths(1),
         )
     }
 
