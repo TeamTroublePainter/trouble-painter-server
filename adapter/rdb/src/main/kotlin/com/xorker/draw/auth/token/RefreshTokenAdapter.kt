@@ -5,6 +5,7 @@ import com.xorker.draw.user.UserId
 import java.nio.ByteBuffer
 import java.security.SecureRandom
 import java.time.LocalDateTime
+import java.time.temporal.TemporalAmount
 import java.util.*
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
@@ -32,11 +33,11 @@ internal class RefreshTokenAdapter(
         return UserId(refreshTokenEntity.userId)
     }
 
-    override fun createRefreshToken(userId: UserId): String {
+    override fun createRefreshToken(userId: UserId, expiredTime: TemporalAmount): String {
         val token = ByteArray(TOKEN_BYTE_SIZE).apply {
             random.nextBytes(this)
         }
-        val expiredAt = LocalDateTime.now().plusYears(100) // TODO 소셜 & 익명 구분 필요
+        val expiredAt = LocalDateTime.now().plus(expiredTime)
 
         jpaRepository.save(
             RefreshTokenJpaEntity.of(token, userId, expiredAt),

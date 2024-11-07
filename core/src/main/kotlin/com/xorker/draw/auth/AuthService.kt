@@ -3,6 +3,7 @@ package com.xorker.draw.auth
 import com.xorker.draw.auth.token.AccessTokenRepository
 import com.xorker.draw.auth.token.RefreshTokenRepository
 import com.xorker.draw.auth.token.Token
+import com.xorker.draw.exception.AlreadyLinkedAccountException
 import com.xorker.draw.user.UserId
 import com.xorker.draw.user.UserInfo
 import com.xorker.draw.user.UserRepository
@@ -19,24 +20,37 @@ internal class AuthService(
     private val accessTokenRepository: AccessTokenRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
 ) : AuthUseCase {
+
     @Transactional
     override fun signIn(authType: AuthType, token: String): Token {
         val platformUserId = authRepository.getPlatformUserId(authType, token)
         val user = userRepository.getUser(authType.authPlatform, platformUserId) ?: createUser(authType, platformUserId)
 
-        return createToken(user.id, Duration.ofHours(3))
+        return createToken(
+            userId = user.id,
+            accessTokenExpirationTime = Duration.ofHours(3),
+            refreshTokenExpirationTime = Period.ofMonths(1),
+        )
     }
 
     override fun anonymousSignIn(): Token {
-        val user = userRepository.createUser(null); // TODO 이름 정책 정해지면 변경 예정
+        val user = userRepository.createUser(null)
 
-        return createToken(user.id, Period.ofYears(100))
+        return createToken(
+            userId = user.id,
+            accessTokenExpirationTime = Period.ofYears(100),
+            refreshTokenExpirationTime = Period.ofYears(100),
+        )
     }
 
     override fun reissue(refreshToken: String): Token {
         val userId = refreshTokenRepository.getUserIdOrThrow(refreshToken)
 
-        return createToken(userId, Period.ofYears(100))
+        return createToken(
+            userId = userId,
+            accessTokenExpirationTime = Duration.ofHours(3),
+            refreshTokenExpirationTime = Period.ofMonths(1),
+        )
     }
 
     @Transactional
@@ -45,16 +59,53 @@ internal class AuthService(
         userRepository.withdrawal(userId)
     }
 
+    @Transactional
+    override fun transfer(userId: UserId, authType: AuthType, token: String): Token {
+        val platformUserId = authRepository.getPlatformUserId(authType, token)
+
+        validateIsAnonymousUser(authType, platformUserId, userId)
+
+        val user = userRepository.transfer(userId, authType.authPlatform, platformUserId)
+
+        return createToken(
+            userId = user.id,
+            accessTokenExpirationTime = Duration.ofHours(3),
+            refreshTokenExpirationTime = Period.ofMonths(1),
+        )
+    }
+
     private fun createUser(authType: AuthType, platformUserId: String): UserInfo {
         val userName = authRepository.getPlatformUserName(authType, platformUserId)
 
         return userRepository.createUser(authType.authPlatform, platformUserId, userName)
     }
 
-    private fun createToken(userId: UserId, expiredTime: TemporalAmount): Token {
+    private fun validateIsAnonymousUser(
+        authType: AuthType,
+        platformUserId: String,
+        userId: UserId,
+    ) {
+        val findUser = userRepository.getUser(authType.authPlatform, platformUserId)
+        if (findUser != null) throw AlreadyLinkedAccountException
+
+        val authInfo = userRepository.getAuthInfo(userId)
+        if (authInfo != null) throw AlreadyLinkedAccountException
+    }
+
+    private fun createToken(
+        userId: UserId,
+        accessTokenExpirationTime: TemporalAmount,
+        refreshTokenExpirationTime: TemporalAmount,
+    ): Token {
         return Token(
-            accessToken = accessTokenRepository.createAccessToken(userId, expiredTime),
-            refreshToken = refreshTokenRepository.createRefreshToken(userId),
+            accessToken = accessTokenRepository.createAccessToken(
+                userId = userId,
+                expiredTime = accessTokenExpirationTime,
+            ),
+            refreshToken = refreshTokenRepository.createRefreshToken(
+                userId = userId,
+                expiredTime = refreshTokenExpirationTime,
+            ),
             userId = userId,
         )
     }
