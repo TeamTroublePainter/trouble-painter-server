@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service
 internal class UserService(
     private val userRepository: UserRepository,
 ) : UserUseCase {
-    override fun getUserDetail(userId: UserId): UserDetail {
-        val userInfo = userRepository.getUser(userId) ?: throw NotFoundUserException
+    override fun getUserDetail(userId: UserId): UserDetail? {
+        val userInfo = userRepository.getUser(userId) ?: return null
 
         val authInfo = userRepository.getAuthInfo(userId)
 
