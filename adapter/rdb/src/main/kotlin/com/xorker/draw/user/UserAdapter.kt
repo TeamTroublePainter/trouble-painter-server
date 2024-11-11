@@ -40,6 +40,9 @@ internal class UserAdapter(
     override fun withdrawal(userId: UserId) {
         val user = userJpaRepository.findByIdOrNull(userId.value) ?: throw NotFoundUserException
         user.withdrawal()
+
+        authUserJpaRepository.deleteAllByUserId(userId.value)
+
         userJpaRepository.save(user)
     }
 
