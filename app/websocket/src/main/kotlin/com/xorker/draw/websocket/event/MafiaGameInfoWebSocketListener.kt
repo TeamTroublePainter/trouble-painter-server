@@ -37,7 +37,7 @@ internal class MafiaGameInfoWebSocketListener(
             mafiaGameMessenger.broadcastPlayerList(gameInfo)
         }
 
-        if (gameInfo.room.isRandomMatching) {
+        if (gameInfo.room.isRandomMatching && gameInfo.phase is MafiaPhase.End) {
             for (player in gameInfo.room.players) {
                 val session = sessionManager.getSession(player.userId) ?: continue
                 session.origin.close()
