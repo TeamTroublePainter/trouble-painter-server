@@ -14,6 +14,7 @@ internal class UserAdapter(
     private val userJpaRepository: UserJpaRepository,
     private val authUserJpaRepository: AuthUserJpaRepository,
 ) : UserRepository {
+
     override fun getUser(platform: AuthPlatform, platformUserId: String): UserInfo? =
         authUserJpaRepository.find(platform, platformUserId)?.user?.toDomain()
 
