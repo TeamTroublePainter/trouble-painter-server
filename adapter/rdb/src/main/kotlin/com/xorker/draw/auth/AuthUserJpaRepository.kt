@@ -20,7 +20,7 @@ internal interface AuthUserJpaRepository : JpaRepository<AuthUserJpaEntity, Long
     @Modifying
     @Query(
         "delete from AuthUserJpaEntity au " +
-            "where au.user = :userId",
+            "where au.user.id = :userId",
     )
     fun deleteAllByUserId(@Param(value = "userId") userId: Long)
 }
