@@ -1,17 +1,26 @@
 package com.xorker.draw.auth
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 
 internal interface AuthUserJpaRepository : JpaRepository<AuthUserJpaEntity, Long> {
 
     @Query(
-        "SELECT au FROM AuthUserJpaEntity au " +
-            "JOIN FETCH au.user " +
-            "WHERE au.platformUserId = :platformUserId " +
+        "select au from AuthUserJpaEntity au " +
+            "join fetch au.user " +
+            "where au.platformUserId = :platformUserId " +
             "and au.platform=:platform ",
     )
-    fun find(platform: AuthPlatform, platformUserId: String): AuthUserJpaEntity?
+    fun findByPlatformAndPlatformUserId(platform: AuthPlatform, platformUserId: String): AuthUserJpaEntity?
 
     fun findByUserId(userId: Long): AuthUserJpaEntity?
+
+    @Modifying
+    @Query(
+        "delete from AuthUserJpaEntity au " +
+            "where au.user = :userId",
+    )
+    fun deleteAllByUserId(@Param(value = "userId") userId: Long)
 }
