@@ -4,5 +4,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties("oauth.google")
 data class GoogleApiProperties(
-    val clientId: String,
+    val clientId: List<String>,
 )

@@ -20,6 +20,7 @@ data object AlreadyJoinRoomException : ClientException("c005", "이미 참여한
 data object InvalidRequestOnlyMyTurnException : ClientException("c006", "요청자의 차례가 아니라서 처리 불가능") { private fun readResolve(): Any = InvalidRequestOnlyMyTurnException }
 data object InvalidRequestOtherPlayingException : ClientException("c007", "진행 중인 게임 방이 있습니다.") { private fun readResolve(): Any = InvalidRequestOtherPlayingException }
 data object AlreadyPlayingRoomException : ClientException("c008", "진행 중인 게임 방에는 참여할 수 없습니다.") { private fun readResolve(): Any = AlreadyPlayingRoomException }
+data object AlreadyLinkedAccountException : ClientException("c009", "이미 소셜 계정이 연동되어 있습니다.") { private fun readResolve(): Any = AlreadyLinkedAccountException }
 data object AlreadyPlayingPlayerException : ClientException("c010", "한 유저가 여러번 접속 시도를 하고 있습니다.") { private fun readResolve(): Any = AlreadyPlayingRoomException }
 
 //endregion

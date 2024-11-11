@@ -63,6 +63,7 @@ fun XorkerException.getButtons(): List<ExceptionButtonType> {
         AlreadyPlayingRoomException,
         InvalidWebSocketStatusException,
         is NotDefinedMessageCodeException,
+        AlreadyLinkedAccountException,
         NotFoundLockKeyException,
         AlreadyPlayingPlayerException,
         -> buttonOk

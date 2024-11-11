@@ -13,7 +13,7 @@ internal class GoogleAuthService(
 ) {
     private val idTokenVerifier =
         GoogleIdTokenVerifier.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance())
-            .setAudience(listOf(googleApiProperties.clientId))
+            .setAudience(googleApiProperties.clientId)
             .build()
 
     fun getPlatformUserId(token: String): String {
@@ -22,6 +22,15 @@ internal class GoogleAuthService(
             return idToken?.payload?.subject ?: throw OAuthFailureException
         } catch (e: GeneralSecurityException) {
             throw OAuthFailureException
+        }
+    }
+
+    fun getEmail(token: String): String? {
+        try {
+            val idToken = idTokenVerifier.verify(token)
+            return idToken?.payload?.email
+        } catch (e: GeneralSecurityException) {
+            return null
         }
     }
 }
