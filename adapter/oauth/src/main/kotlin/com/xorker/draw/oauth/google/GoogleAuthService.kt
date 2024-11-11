@@ -13,7 +13,7 @@ internal class GoogleAuthService(
 ) {
     private val idTokenVerifier =
         GoogleIdTokenVerifier.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance())
-            .setAudience(listOf(googleApiProperties.clientId))
+            .setAudience(googleApiProperties.clientId)
             .build()
 
     fun getPlatformUserId(token: String): String {
