@@ -12,4 +12,10 @@ internal class AppleAuthService(
 
         return validator.validateAndGetSubject(token, publicKey)
     }
+
+    internal fun getEmail(token: String): String? {
+        val publicKey = keyGenerator.generatePublicKey(token)
+
+        return validator.validateAndGetEmail(token, publicKey)
+    }
 }

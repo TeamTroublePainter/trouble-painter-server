@@ -24,4 +24,12 @@ internal class AppleIdTokenValidator(
             aud = clientId,
         ) ?: throw OAuthFailureException
     }
+
+    internal fun validateAndGetEmail(token: String, key: SignatureKey): String? {
+        return jwtProvider.validateAndGetClaim(
+            token = token,
+            key = key,
+            claimName = "email",
+        )
+    }
 }

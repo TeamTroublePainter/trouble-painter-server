@@ -40,6 +40,11 @@ class JwtProvider {
         return null
     }
 
+    fun validateAndGetClaim(token: String, key: SignatureKey, claimName: String): String? {
+        val payload = parsePayload(token, key) ?: return null
+        return payload.get(claimName, String::class.java)
+    }
+
     fun parseHeader(token: String): Map<String, String>? {
         try {
             val header = token.split(".")[0]
