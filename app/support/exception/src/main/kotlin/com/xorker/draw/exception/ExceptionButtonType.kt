@@ -66,6 +66,7 @@ fun XorkerException.getButtons(): List<ExceptionButtonType> {
         AlreadyLinkedAccountException,
         NotFoundLockKeyException,
         AlreadyPlayingPlayerException,
+        AlreadyWaitingUserException,
         -> buttonOk
     }
 }
