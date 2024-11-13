@@ -22,7 +22,6 @@ internal class RoomWebSocketHandler(
     parser: WebSocketRequestParser,
     tokenUseCase: TokenUseCase,
     gameUseCase: MafiaGameUseCase,
-    userUseCase: UserUseCase,
     webSocketExceptionHandler: WebSocketExceptionHandler,
     userUseCase: UserUseCase,
     private val userConnectionUseCase: UserConnectionUseCase,
