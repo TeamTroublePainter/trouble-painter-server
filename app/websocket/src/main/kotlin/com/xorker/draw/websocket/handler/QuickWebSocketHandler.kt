@@ -24,7 +24,6 @@ internal class QuickWebSocketHandler(
     gameUseCase: MafiaGameUseCase,
     userUseCase: UserUseCase,
     webSocketExceptionHandler: WebSocketExceptionHandler,
-    userUseCase: UserUseCase,
     private val userConnectionUseCase: UserConnectionUseCase,
     private val router: WebSocketRouter,
     private val waitingQueueUseCase: WaitingQueueUseCase,
