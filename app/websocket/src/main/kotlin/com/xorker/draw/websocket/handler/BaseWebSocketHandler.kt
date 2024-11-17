@@ -156,9 +156,14 @@ internal abstract class BaseWebSocketHandler(
 
     private fun getUser(session: WebSocketSession): User? {
         val userId = getUserId(session) ?: return null
-        val encodedNickname = session.getHeader(HEADER_NICKNAME) ?: return null
+        val encodedNickname = session.getHeader(HEADER_NICKNAME)
         val user = userUseCase.getUserDetail(userId)
-        val nickname = user?.name ?: URLDecoder.decode(encodedNickname, StandardCharsets.UTF_8.toString())
+
+        if (user?.name != null) return User(userId, user.name!!)
+
+        if (encodedNickname == null) throw InvalidRequestValueException
+
+        val nickname = URLDecoder.decode(encodedNickname, StandardCharsets.UTF_8.toString())
 
         return User(userId, nickname)
     }
