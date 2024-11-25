@@ -1,5 +1,6 @@
 package com.xorker.draw.mafia
 
+import com.xorker.draw.exception.AlreadyWaitingUserException
 import com.xorker.draw.exception.UnSupportedException
 import com.xorker.draw.user.User
 import java.util.concurrent.ConcurrentHashMap
@@ -16,6 +17,9 @@ internal class MafiaGameWaitingQueueAdapter : MafiaGameWaitingQueueRepository {
 
     override fun enqueue(user: User, locale: String) {
         val queue = waitingQueue.getOrPut(locale) { ConcurrentLinkedQueue() }
+
+        queue.forEach { if (it.id == user.id) throw AlreadyWaitingUserException }
+
         queue.add(user)
     }
 
