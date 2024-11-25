@@ -13,9 +13,9 @@ internal interface AuthUserJpaRepository : JpaRepository<AuthUserJpaEntity, Long
             "where au.platformUserId = :platformUserId " +
             "and au.platform=:platform ",
     )
-    fun find(platform: AuthPlatform, platformUserId: String): AuthUserJpaEntity?
+    fun findByPlatformAndPlatformUserId(platform: AuthPlatform, platformUserId: String): AuthUserJpaEntity?
 
-    fun findByUserId(userId: Long): AuthUserJpaEntity
+    fun findByUserId(userId: Long): AuthUserJpaEntity?
 
     @Modifying
     @Query(
