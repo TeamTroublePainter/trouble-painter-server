@@ -23,8 +23,8 @@ internal class PrincipalUserArgumentResolver : HandlerMethodArgumentResolver {
         @Nullable binderFactory: WebDataBinderFactory?,
     ): PrincipalUser? {
         val principal = SecurityContextHolder.getContext()
-            .authentication
-            .principal as? UserId
+            ?.authentication
+            ?.principal as? UserId
             ?: return null
         return PrincipalUser(principal)
     }

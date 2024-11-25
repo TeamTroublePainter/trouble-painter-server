@@ -37,6 +37,11 @@ subprojects {
     dependencies {
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.JACKSON}")
         implementation("org.springframework.boot:spring-boot-starter-test:${Versions.SPRING_BOOT}")
+
+        testImplementation("io.kotest:kotest-runner-junit5:${Versions.KOTEST}")
+        testImplementation("io.kotest:kotest-assertions-core:${Versions.KOTEST}")
+
+        testImplementation("io.mockk:mockk:${Versions.MOCKK}")
     }
 
     tasks.test {

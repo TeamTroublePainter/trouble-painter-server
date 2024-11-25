@@ -1,15 +1,14 @@
 package com.xorker.draw.mafia.phase
 
+import com.xorker.draw.event.mafia.MafiaGameInfoEventProducer
 import com.xorker.draw.exception.InvalidMafiaPhaseException
 import com.xorker.draw.mafia.MafiaGameInfo
-import com.xorker.draw.mafia.MafiaGameMessenger
 import com.xorker.draw.mafia.MafiaGameRepository
 import com.xorker.draw.mafia.MafiaGameResultRepository
 import com.xorker.draw.mafia.MafiaPhase
-import com.xorker.draw.mafia.MafiaPhaseMessenger
 import com.xorker.draw.mafia.assertIs
-import com.xorker.draw.mafia.event.JobWithStartTime
 import com.xorker.draw.timer.TimerRepository
+import java.time.Duration
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,8 +16,7 @@ internal class MafiaPhaseEndGameProcessor(
     private val mafiaGameRepository: MafiaGameRepository,
     private val timerRepository: TimerRepository,
     private val mafiaGameResultRepository: MafiaGameResultRepository,
-    private val mafiaPhaseMessenger: MafiaPhaseMessenger,
-    private val mafiaGameMessenger: MafiaGameMessenger,
+    private val mafiaGameInfoEventProducer: MafiaGameInfoEventProducer,
 ) {
 
     internal fun endGame(gameInfo: MafiaGameInfo): MafiaPhase.End {
@@ -26,29 +24,38 @@ internal class MafiaPhaseEndGameProcessor(
 
         val gameOption = gameInfo.gameOption
 
-        val job = timerRepository.startTimer(gameOption.endTime) {
-            processEndGame(gameInfo)
-        }
+        val room = gameInfo.room
 
-        val endPhase = assertAndGetEndPhase(job, phase)
+        val endPhase = assertAndGetEndPhase(phase)
 
         judgeGameResult(endPhase)
 
         gameInfo.phase = endPhase
 
+        mafiaGameRepository.saveGameInfo(gameInfo)
+
         mafiaGameResultRepository.saveMafiaGameResult(gameInfo)
 
+        if (room.isRandomMatching) {
+            timerRepository.startTimer(room.id, Duration.ofMillis(1)) {
+                mafiaGameRepository.removeGameInfo(gameInfo)
+            }
+        } else {
+            timerRepository.startTimer(room.id, gameOption.endTime) {
+                processEndGame(gameInfo)
+            }
+        }
         return endPhase
     }
 
-    private fun assertAndGetEndPhase(job: JobWithStartTime, phase: MafiaPhase): MafiaPhase.End {
+    private fun assertAndGetEndPhase(phase: MafiaPhase): MafiaPhase.End {
         return when (phase) {
             is MafiaPhase.Vote -> {
-                phase.toEnd(job)
+                phase.toEnd()
             }
 
             is MafiaPhase.InferAnswer -> {
-                phase.toEnd(job)
+                phase.toEnd()
             }
 
             else -> {
@@ -82,8 +89,7 @@ internal class MafiaPhaseEndGameProcessor(
 
         mafiaGameRepository.saveGameInfo(gameInfo)
 
-        mafiaPhaseMessenger.broadcastPhase(gameInfo)
-        mafiaGameMessenger.broadcastPlayerList(gameInfo)
+        mafiaGameInfoEventProducer.changePhase(gameInfo)
     }
 
     private fun judgeGameResult(endPhase: MafiaPhase.End) {
