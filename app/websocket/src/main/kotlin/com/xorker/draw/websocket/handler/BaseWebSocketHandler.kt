@@ -12,6 +12,7 @@ import com.xorker.draw.support.logging.logger
 import com.xorker.draw.support.logging.registerRequestId
 import com.xorker.draw.user.User
 import com.xorker.draw.user.UserId
+import com.xorker.draw.user.UserUseCase
 import com.xorker.draw.websocket.exception.WebSocketExceptionHandler
 import com.xorker.draw.websocket.message.request.RequestAction
 import com.xorker.draw.websocket.message.request.WebSocketRequest
@@ -36,6 +37,7 @@ internal abstract class BaseWebSocketHandler(
     private val tokenUseCase: TokenUseCase,
     private val gameUseCase: MafiaGameUseCase,
     private val webSocketExceptionHandler: WebSocketExceptionHandler,
+    private val userUseCase: UserUseCase,
 ) : TextWebSocketHandler() {
     private val logger = logger()
 
@@ -154,7 +156,13 @@ internal abstract class BaseWebSocketHandler(
 
     private fun getUser(session: WebSocketSession): User? {
         val userId = getUserId(session) ?: return null
-        val encodedNickname = session.getHeader(HEADER_NICKNAME) ?: return null
+        val encodedNickname = session.getHeader(HEADER_NICKNAME)
+        val user = userUseCase.getUserDetail(userId)
+
+        if (user?.name != null) return User(userId, user.name!!)
+
+        if (encodedNickname == null) throw InvalidRequestValueException
+
         val nickname = URLDecoder.decode(encodedNickname, StandardCharsets.UTF_8.toString())
 
         return User(userId, nickname)
