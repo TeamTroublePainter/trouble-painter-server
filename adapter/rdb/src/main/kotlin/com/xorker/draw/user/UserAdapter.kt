@@ -14,6 +14,7 @@ internal class UserAdapter(
     private val userJpaRepository: UserJpaRepository,
     private val authUserJpaRepository: AuthUserJpaRepository,
 ) : UserRepository {
+
     override fun getUser(platform: AuthPlatform, platformUserId: String): UserInfo? =
         authUserJpaRepository.find(platform, platformUserId)?.user?.toDomain()
 
@@ -40,6 +41,9 @@ internal class UserAdapter(
     override fun withdrawal(userId: UserId) {
         val user = userJpaRepository.findByIdOrNull(userId.value) ?: throw NotFoundUserException
         user.withdrawal()
+
+        authUserJpaRepository.deleteAllByUserId(userId.value)
+
         userJpaRepository.save(user)
     }
 
