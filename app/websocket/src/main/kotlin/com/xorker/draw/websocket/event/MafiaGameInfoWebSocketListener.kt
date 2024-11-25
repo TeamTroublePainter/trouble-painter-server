@@ -11,12 +11,14 @@ import com.xorker.draw.user.User
 import com.xorker.draw.user.UserId
 import com.xorker.draw.websocket.message.response.MafiaGameMessenger
 import com.xorker.draw.websocket.message.response.MafiaPhaseMessenger
+import com.xorker.draw.websocket.session.SessionManager
 import org.springframework.stereotype.Component
 
 @Component
 internal class MafiaGameInfoWebSocketListener(
     private val mafiaPhaseMessenger: MafiaPhaseMessenger,
     private val mafiaGameMessenger: MafiaGameMessenger,
+    private val sessionManager: SessionManager,
 ) : MafiaGameInfoStatusChangedListener, MafiaGameActionListener, MafiaGameMatchListener {
 
     override fun connectUser(gameInfo: MafiaGameInfo, userId: UserId) {
@@ -33,6 +35,13 @@ internal class MafiaGameInfoWebSocketListener(
 
         if (gameInfo.phase == MafiaPhase.Wait) {
             mafiaGameMessenger.broadcastPlayerList(gameInfo)
+        }
+
+        if (gameInfo.room.isRandomMatching) {
+            for (player in gameInfo.room.players) {
+                val session = sessionManager.getSession(player.userId) ?: continue
+                session.origin.close()
+            }
         }
     }
 
